@@ -6,6 +6,4 @@ run_django_tests:
   stage: test
   script: 
     - pip install pipenv
-    - pipenv install
-    - pipenv shell
-    - python3 manage.py test
+    - pipenv run python3 manage.py test
