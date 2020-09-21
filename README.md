@@ -5,6 +5,13 @@ and student data.
 
 Written in Django.
 
+## Setup
+
+### Install dependencies
+
+1. `python3 -m pip install pipenv`
+2. `pipenv shell`
+
 ## Running the server
 
 To run the server, use the following command: `python3 manage.py runserver`.
