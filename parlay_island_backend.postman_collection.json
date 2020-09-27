@@ -1,0 +1,84 @@
+{
+	"info": {
+		"_postman_id": "74c0a161-b94d-483f-b645-b7aa7393900f",
+		"name": "Parlay Island Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "questions",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/questions",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"questions"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "questions",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/questions",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": null
+				},
+				{
+					"name": "Default",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{url}}/questions",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"questions"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": null,
+					"cookie": [],
+					"body": "{\n    \"questions\": [\n        {\n            \"id\": 1,\n            \"body\": \"What is opportunity cost?\",\n            \"tags\": [\n                \"economics\"\n                ],\n            \"timesAnswered\": 6,\n            \"timesCorrect\": 5,\n            \"choices\": [\n                {\n                    \"id\": 1,\n                    \"body\": \"a pizza\",\n                    \"timesChosen\": 1\n                },\n                {\n                    \"id\": 2,\n                    \"body\": \"a choice\",\n                    \"timesChosen\": 0\n                },\n                {\n                    \"id\": 3,\n                    \"body\": \"the loss of potential gain from other alternatives when one alternative is chosen\",\n                    \"timesChosen\": 5\n                },\n                {\n                    \"id\": 4,\n                    \"body\": \"the cost of giving some an opportunity\",\n                    \"timesChosen\": 0\n                }\n            ],\n            \"answer\": [\n                3\n            ]\n        }\n    ]\n}"
+				}
+			]
+		}
+	],
+	"protocolProfileBehavior": {}
+}
