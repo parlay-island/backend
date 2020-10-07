@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
 
-from teacher.models import Question
-from teacher.serializer import QuestionSerializer
+from teacher.models import Question, Choice
+from teacher.serializer import QuestionSerializer, ChoiceSerializer
 
 
 def questions_controller(request):
@@ -32,17 +32,34 @@ def get_all_questions(request):
 def post_question(request):
     payload = json.loads(request.body)
     try:
-        question = Question.objects.create(
-            body=payload['body'],
-            times_answered=payload['times_answered'],
-            times_correct=payload['times_correct'],
-            tags=payload['tags'],
-            answer=payload['answer']
-        )
-        serializer = QuestionSerializer(question)
-        return JsonResponse({'questions': serializer.data}, safe=False, status=status.HTTP_201_CREATED)
+        (question_map, question) = add_question(payload)
+        full_question_map = add_choices(question_map, question, payload['choices'])
+        return JsonResponse({'questions': full_question_map}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
+
+
+def add_choices(question_map, question, choices_list):
+    choices = list(map(lambda choice: ChoiceSerializer(choice).data,
+                       map(lambda choice_map: Choice.objects.create(
+                           body=choice_map['body'],
+                           times_chosen=choice_map['times_chosen'],
+                           question=question
+                       ), choices_list)))
+    question_map['choices'] = choices
+    return question_map
+
+
+def add_question(question_map):
+    question = Question.objects.create(
+        body=question_map['body'],
+        times_answered=question_map['times_answered'],
+        times_correct=question_map['times_correct'],
+        tags=question_map['tags'],
+        answer=question_map['answer']
+    )
+    serializer = QuestionSerializer(question)
+    return serializer.data, question
 
 
 def delete_question(request, questionId):

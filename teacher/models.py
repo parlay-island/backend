@@ -9,3 +9,10 @@ class Question(models.Model):
     times_correct = models.IntegerField(default=0)
     tags = ArrayField(models.CharField(max_length=500), size=8, default=list)
     answer = ArrayField(models.IntegerField(), size=8, default=list)
+
+
+class Choice(models.Model):
+    id = models.AutoField(primary_key=True)
+    body = models.CharField(max_length=500, default="")
+    times_chosen = models.IntegerField(default=0)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
