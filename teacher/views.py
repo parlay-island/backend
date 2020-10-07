@@ -13,6 +13,7 @@ TIMES_CORRECT = 'times_correct'
 TIMES_CHOSEN = 'times_chosen'
 TAGS = 'tags'
 ANSWER = 'answer'
+TAG = 'tag'
 
 
 class BadRequestException(Exception):
@@ -21,6 +22,8 @@ class BadRequestException(Exception):
 
 def questions_controller(request):
     if request.method == 'GET':
+        if TAG in request.GET:
+            return get_questions_by_tag(request, request.GET.get(TAG))
         return get_all_questions(request)
     elif request.method == 'POST':
         return post_question(request)
@@ -39,6 +42,12 @@ def question_controller(request, questionId):
 
 def get_all_questions(request):
     questions = Question.objects.all()
+    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question),questions))
+    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+
+
+def get_questions_by_tag(request, tag):
+    questions = Question.objects.filter(tags__contains=[tag])
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question),questions))
     return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
 
