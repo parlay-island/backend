@@ -4,6 +4,8 @@ stages:
 
 run_django_tests:
   stage: test
+  tags:
+    - db-connected
   script: 
     - pip install pipenv
     - pipenv install
