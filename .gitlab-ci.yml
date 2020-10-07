@@ -1,9 +1,11 @@
-image: python3.7.7
+image: python
 stages:
   - test
 
 run_django_tests:
   stage: test
+  tags:
+    - db-connected
   script: 
     - pip install pipenv
     - pipenv install
