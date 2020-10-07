@@ -19,8 +19,11 @@ def questions_controller(request):
 def question_controller(request, questionId):
     if request.method == 'GET':
         return Question.objects.get(pk=questionId)
+    elif request.method == 'PUT':
+        return put_question(request, questionId)
     elif request.method == 'DELETE':
         return delete_question(request, questionId)
+    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def get_all_questions(request):
@@ -67,6 +70,14 @@ def delete_question(request, questionId):
         return JsonResponse({}, safe=False, status=status.HTTP_404_NOT_FOUND)
 
     question = Question.objects.get(pk=questionId)
-    serializer = QuestionSerializer(question)
+    question_serialized = QuestionSerializer.serialize(question)
     question.delete()
-    return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+    return JsonResponse(question_serialized, safe=False, status=status.HTTP_200_OK)
+
+
+def put_question(request, questionId):
+    question_fields_to_update = json.loads(request.body)
+    question = Question.objects.get(pk=questionId)
+    for field, value in question_fields_to_update.items():
+        setattr(question, field, value)
+    return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
