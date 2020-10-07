@@ -24,6 +24,7 @@ SECRET_KEY = 'gi!eu^mr%u-h#8ysx79%smjacl&3r+*&0$^(^4b)fp+(-y&03u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+APPEND_SLASH=False
 
 ALLOWED_HOSTS = []
 
@@ -37,13 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'teacher.apps.TeacherConfig'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -75,8 +76,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'parlay-backend-sandbox.cas0dnsdcu3k.us-east-2.rds.amazonaws.com',
+        'PORT': '5432',
     }
 }
 
@@ -113,6 +118,11 @@ USE_L10N = True
 
 USE_TZ = True
 
+CSRF_COOKIE_SECURE = False
+
+CSRF_COOKIE_HTTPONLY = False
+
+SESSION_COOKIE_SECURE = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
