@@ -77,10 +77,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'wwnnyqhs',
-        'USER': 'wwnnyqhs',
-        'PASSWORD': 'sT8vs6si1RRi0G0h5qmRoEi_ENuWI0Po',
-        'HOST': 'isilo.db.elephantsql.com',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'parlay-backend-sandbox.cas0dnsdcu3k.us-east-2.rds.amazonaws.com',
         'PORT': '5432',
     }
 }

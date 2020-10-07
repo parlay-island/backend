@@ -7,6 +7,17 @@ from rest_framework import status
 from teacher.models import Question, Choice
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
 
+BODY = 'body'
+TIMES_ANSWERED = 'times_answered'
+TIMES_CORRECT = 'times_correct'
+TIMES_CHOSEN = 'times_chosen'
+TAGS = 'tags'
+ANSWER = 'answer'
+
+
+class BadRequestException(Exception):
+    pass
+
 
 def questions_controller(request):
     if request.method == 'GET':
@@ -18,7 +29,7 @@ def questions_controller(request):
 
 def question_controller(request, questionId):
     if request.method == 'GET':
-        return Question.objects.get(pk=questionId)
+        return get_single_question(request, questionId)
     elif request.method == 'PUT':
         return put_question(request, questionId)
     elif request.method == 'DELETE':
@@ -27,9 +38,18 @@ def question_controller(request, questionId):
 
 
 def get_all_questions(request):
-    books = Question.objects.all()
-    serializer = QuestionSerializer(books, many=True)
-    return JsonResponse({'questions': serializer.data}, safe=False, status=status.HTTP_200_OK)
+    questions = Question.objects.all()
+    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question),questions))
+    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+
+
+def get_single_question(request, questionId):
+    try:
+        question = Question.objects.get(pk=questionId)
+        return JsonResponse(QuestionSerializer.serialize(question), status=status.HTTP_200_OK)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'error': 'No question found with id [%d]' % questionId},
+                            safe=False, status=status.HTTP_404_NOT_FOUND)
 
 
 def post_question(request):
@@ -40,13 +60,15 @@ def post_question(request):
         return JsonResponse({'questions': full_question_map}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
+    except KeyError as e:
+        return JsonResponse({'error': 'Must define %s' % str(e)}, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
 
 def add_choices(question_map, question, choices_list):
     choices = list(map(lambda choice: ChoiceSerializer(choice).data,
                        map(lambda choice_map: Choice.objects.create(
                            body=choice_map['body'],
-                           times_chosen=choice_map['times_chosen'],
+                           times_chosen=choice_map[TIMES_CHOSEN] if TIMES_CHOSEN in choice_map else 0,
                            question=question
                        ), choices_list)))
     question_map['choices'] = choices
@@ -55,14 +77,14 @@ def add_choices(question_map, question, choices_list):
 
 def add_question(question_map):
     question = Question.objects.create(
-        body=question_map['body'],
-        times_answered=question_map['times_answered'],
-        times_correct=question_map['times_correct'],
-        tags=question_map['tags'],
-        answer=question_map['answer']
+        body=question_map[BODY],
+        times_answered=question_map[TIMES_ANSWERED] if TIMES_ANSWERED in question_map else 0,
+        times_correct=question_map[TIMES_CORRECT] if TIMES_CORRECT in question_map else 0,
+        tags=question_map[TAGS] if TAGS in question_map else list(),
+        answer=question_map[ANSWER]
     )
-    serializer = QuestionSerializer(question)
-    return serializer.data, question
+    question_serialized = QuestionSerializer.serialize(question)
+    return question_serialized, question
 
 
 def delete_question(request, questionId):
@@ -76,8 +98,13 @@ def delete_question(request, questionId):
 
 
 def put_question(request, questionId):
-    question_fields_to_update = json.loads(request.body)
-    question = Question.objects.get(pk=questionId)
-    for field, value in question_fields_to_update.items():
-        setattr(question, field, value)
-    return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
+    try:
+        question_fields_to_update = json.loads(request.body)
+        question = Question.objects.get(pk=questionId)
+        for field, value in question_fields_to_update.items():
+            setattr(question, field, value)
+        question.save()
+        return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'No question found with id [%d]' % questionId},
+                            safe=False, status=status.HTTP_404_NOT_FOUND)
