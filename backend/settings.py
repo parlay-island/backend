@@ -26,7 +26,7 @@ SECRET_KEY = 'gi!eu^mr%u-h#8ysx79%smjacl&3r+*&0$^(^4b)fp+(-y&03u'
 DEBUG = True
 APPEND_SLASH=False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
