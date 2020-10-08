@@ -8,14 +8,20 @@ from django.test import Client
 
 
 class QuestionTestCase(TestCase):
+    tag = 'tag'
     client: Client = None
     question: Question = None
+    question_tagged: Question = None
     id = None
 
     def setUp(self):
         self.client: Client = Client()
         self.question = Question.objects.create(
             body='This is a question'
+        )
+        self.question_tagged = Question.objects.create(
+            body='This is a question',
+            tags=[self.tag]
         )
 
     def test_get_all_questions(self):
@@ -62,3 +68,11 @@ class QuestionTestCase(TestCase):
     def test_404_for_delete_question(self):
         assert_that(self.client.delete('/questions/%d' % 60).status_code,
                     is_(404))
+
+    def test_get_questions_by_tag(self):
+        assert_that(json.loads(self.client.get('/questions/?tag=%s' % self.tag).content)['questions'][0],
+                    has_entries(QuestionSerializer.serialize(self.question_tagged)))
+
+    def test_get_questions_by_tag_doesnt_include_untagged(self):
+        assert_that(json.loads(self.client.get('/questions/?tag=%s' % 'bad tag').content)['questions'],
+                    has_length(0))
