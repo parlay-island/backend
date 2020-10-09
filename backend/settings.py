@@ -26,7 +26,7 @@ SECRET_KEY = 'gi!eu^mr%u-h#8ysx79%smjacl&3r+*&0$^(^4b)fp+(-y&03u'
 DEBUG = False
 APPEND_SLASH=False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'parlay-island-backend.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'parlay-island-backend.herokuapp.com', 'http://localhost:50717']
 
 
 # Application definition
@@ -73,7 +73,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1', 
+    'http://127.0.0.1',
     'http://parlay-island-backend.herokuapp.com'
 ]
 
