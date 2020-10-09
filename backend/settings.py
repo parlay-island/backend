@@ -74,7 +74,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1',
-    'http://parlay-island-backend.herokuapp.com'
+    'http://parlay-island-backend.herokuapp.com',
     'http://parlay-island-game.herokuapp.com'
 ]
 
