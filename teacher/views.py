@@ -42,13 +42,13 @@ def question_controller(request, questionId):
 
 def get_all_questions(request):
     questions = Question.objects.all()
-    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question),questions))
+    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
 
 
 def get_questions_by_tag(request, tag):
     questions = Question.objects.filter(tags__contains=[tag])
-    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question),questions))
+    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
 
 
@@ -117,3 +117,12 @@ def put_question(request, questionId):
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'No question found with id [%d]' % questionId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
+
+
+def units_controller(request):
+    return JsonResponse({"units": ["Economics",
+                                   "Income & Education",
+                                   "Money & Credit Management",
+                                   "Financial Planning",
+                                   "Critical Consumerism"]
+                         }, safe=False, status=status.HTTP_200_OK)
