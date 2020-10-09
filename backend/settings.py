@@ -73,8 +73,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 CORS_ALLOWED_ORIGINS = [
-    '127.0.0.1', 
-    'parlay-island-backend.herokuapp.com',
+    'http://127.0.0.1', 
+    'http://parlay-island-backend.herokuapp.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
