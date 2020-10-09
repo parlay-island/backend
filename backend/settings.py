@@ -26,7 +26,9 @@ SECRET_KEY = 'gi!eu^mr%u-h#8ysx79%smjacl&3r+*&0$^(^4b)fp+(-y&03u'
 DEBUG = False
 APPEND_SLASH=False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'parlay-island-backend.herokuapp.com']
+ALLOWED_HOSTS = ['http://127.0.0.1',
+                 'http://parlay-island-backend.herokuapp.com',
+                 'http://parlay-island-game.herokuapp.com']
 
 
 # Application definition
@@ -38,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'teacher.apps.TeacherConfig'
+    'teacher.apps.TeacherConfig',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -70,6 +74,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1',
+    'http://parlay-island-backend.herokuapp.com',
+    'http://parlay-island-game.herokuapp.com'
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:*'
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'GET',
+    'OPTIONS',
+    'POST',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
