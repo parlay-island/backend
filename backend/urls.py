@@ -21,5 +21,6 @@ import teacher.views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('questions/', teacher.views.questions_controller),
-    path('questions/<int:questionId>', teacher.views.question_controller)
+    path('questions/<int:questionId>', teacher.views.question_controller),
+    path('units/', teacher.views.units_controller)
 ]
