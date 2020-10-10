@@ -28,6 +28,14 @@ APPEND_SLASH=False
 
 ALLOWED_HOSTS = ['*']
 
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'foo' and 'bar' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=teacher',
+]
 
 # Application definition
 
@@ -40,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'teacher.apps.TeacherConfig',
     'corsheaders',
+    'django_nose'
 ]
 
 MIDDLEWARE = [
