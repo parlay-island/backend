@@ -116,7 +116,4 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+builds/*

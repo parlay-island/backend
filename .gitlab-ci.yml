@@ -15,6 +15,8 @@ run_django_tests:
 
 deploy_to_stage:
   stage: deploy
+  tags:
+    - brew-installed
   environment:
     name: staging
   script:
@@ -25,6 +27,8 @@ deploy_to_stage:
 
 deploy_to_prod:
   stage: deploy
+  tags:
+    - brew-installed
   environment:
     name: prod
   when: manual
