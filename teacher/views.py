@@ -122,8 +122,8 @@ def put_question(request, questionId):
 
 def units_controller(request):
     return JsonResponse({"units": ["Economics",
-                                   "Income & Education",
-                                   "Money & Credit Management",
+                                   "Income and Education",
+                                   "Money and Credit Management",
                                    "Financial Planning",
                                    "Critical Consumerism"]
                          }, safe=False, status=status.HTTP_200_OK)
