@@ -22,5 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('questions/', teacher.views.questions_controller),
     path('questions/<int:questionId>', teacher.views.question_controller),
+    path('results/summary/', teacher.views.results_controller),
+    path('levels/<int:level>/results/', teacher.views.level_results_controller),
     path('units/', teacher.views.units_controller)
 ]

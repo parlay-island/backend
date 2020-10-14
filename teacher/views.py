@@ -1,11 +1,12 @@
 import json
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import JsonResponse
 from rest_framework import status
 
-from teacher.models import Question, Choice
-from teacher.serializer import QuestionSerializer, ChoiceSerializer
+from teacher.models import Question, Choice, Result
+from teacher.serializer import QuestionSerializer, ChoiceSerializer, ResultSerializer
 
 BODY = 'body'
 TIMES_ANSWERED = 'times_answered'
@@ -14,7 +15,7 @@ TIMES_CHOSEN = 'times_chosen'
 TAGS = 'tags'
 ANSWER = 'answer'
 TAG = 'tag'
-
+PAGE_SIZE = 10
 
 class BadRequestException(Exception):
     pass
@@ -126,3 +127,39 @@ def units_controller(request):
                                    "Financial Planning",
                                    "Critical Consumerism"]
                          }, safe=False, status=status.HTTP_200_OK)
+
+def results_controller(request):
+    if request.method == 'GET':
+        return get_all_results(request)
+    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def level_results_controller(request, level):
+    if request.method == 'GET':
+        return get_results_by_level(request, level)
+    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def get_paginated_results(results, num_items_per_page, page_number=1):
+    paginator = Paginator(results, num_items_per_page)
+    try:
+        page = paginator.page(page_number)
+    except PageNotAnInteger:
+        page = paginator.page(1)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    return page.object_list
+
+def get_all_results(request):
+    results = Result.objects.order_by('-distance').all()
+    page_number = request.GET.get('page')
+    results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
+    if page_number is not None: 
+        results_serialized = get_paginated_results(results_serialized, PAGE_SIZE, page_number)
+    return JsonResponse({'results': results_serialized}, safe=False, status=status.HTTP_200_OK)
+
+def get_results_by_level(request, level):
+    results = Result.objects.filter(level=level).order_by('-distance')
+    page_number = request.GET.get('page')
+    results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
+    if page_number is not None: 
+        results_serialized = get_paginated_results(results_serialized, PAGE_SIZE, page_number)
+    return JsonResponse({'results': results_serialized}, safe=False, status=status.HTTP_200_OK)

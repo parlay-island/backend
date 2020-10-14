@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from teacher.models import Question, Choice
+from teacher.models import Question, Choice, Result
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -24,3 +24,12 @@ class ChoiceSerializer(serializers.ModelSerializer):
     @staticmethod
     def serialize(choice):
         return ChoiceSerializer(choice).data
+
+class ResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Result
+        fields = ['id', 'level', 'distance', 'player_id']
+
+    @staticmethod
+    def serialize(result):
+        return ResultSerializer(result).data
