@@ -9,7 +9,6 @@ run_django_tests:
     - db-connected
   script: 
     - pip install pipenv
-    - pipenv install
     - pipenv run python3 manage.py test
 
 deploy_to_stage:
