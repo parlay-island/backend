@@ -7,8 +7,10 @@ run_django_tests:
   stage: test
   tags:
     - db-connected
-  script: 
+  script:
     - pip install pipenv
+    - pipenv --rm
+    - pipenv install
     - pipenv run python3 manage.py test
 
 deploy_to_stage:
