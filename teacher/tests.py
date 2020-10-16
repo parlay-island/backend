@@ -115,15 +115,14 @@ class ResultTestCase(TestCase):
         assert_that(res[3], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(4)) 
     
-    @mock.patch("teacher.views.PAGE_SIZE", 2)
+    @mock.patch("teacher.views.result_view.PAGE_SIZE", 2)
     def test_get_all_results_paginated(self):
         res = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res, has_length(2)) 
 
-
-    @mock.patch("teacher.views.PAGE_SIZE", 4)
+    @mock.patch("teacher.views.result_view.PAGE_SIZE", 4)
     def test_paginated_results_same_as_non_paginated_for_all(self):
         res_paginated = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)['results']
         res_non_paginated = json.loads(self.client.get('/results/summary/').content)['results']
@@ -136,13 +135,13 @@ class ResultTestCase(TestCase):
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result2_level2)))
         assert_that(res, has_length(2)) 
 
-    @mock.patch("teacher.views.PAGE_SIZE", 1)
+    @mock.patch("teacher.views.level_views.PAGE_SIZE", 1)
     def test_get_results_by_level_paginated(self):
         res = json.loads(self.client.get('/levels/2/results/?page=%d' % 1).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res, has_length(1)) 
 
-    @mock.patch("teacher.views.PAGE_SIZE", 2)
+    @mock.patch("teacher.views.level_views.PAGE_SIZE", 2)
     def test_paginated_results_same_as_non_paginated_for_level(self):
         res_paginated = json.loads(self.client.get('/levels/2/results/?page=%d' % 1).content)['results']
         res_non_paginated = json.loads(self.client.get('/levels/2/results/').content)['results']
@@ -158,17 +157,16 @@ class ResultTestCase(TestCase):
         assert_that(self.client.get('/levels/results/').status_code, is_(404))
 
     # negative path test
-    @mock.patch("teacher.views.PAGE_SIZE", 1)
+    @mock.patch("teacher.views.result_view.PAGE_SIZE", 1)
     def test_paginated_page_not_number(self):
         res = json.loads(self.client.get('/results/summary/?page=%s' % 'test').content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res, has_length(1)) 
         
     # negative path test
-    @mock.patch("teacher.views.PAGE_SIZE", 1)
+    @mock.patch("teacher.views.result_view.PAGE_SIZE", 1)
     def test_paginated_page_not_present(self):
         res = json.loads(self.client.get('/results/summary/?page=%d' % 20).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(1)) 
 
-    
