@@ -6,11 +6,13 @@ stages:
 run_django_tests:
   stage: test
   tags:
-    - db-connected
+    - docker
   script:
     - pip install pipenv
     - pipenv --rm
     - pipenv install
+    - ./start_db.sh || true
+    - cp .env.local .env
     - pipenv run python3 manage.py test
 
 deploy_to_stage:
