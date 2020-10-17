@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import path
 
 import teacher.views
+import teacher.health
 
 urlpatterns = [
+    path('', teacher.health.health_check),
     path('admin/', admin.site.urls),
     path('questions/', teacher.views.questions_controller),
     path('questions/<int:questionId>', teacher.views.question_controller),

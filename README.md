@@ -10,23 +10,26 @@ Written in Django.
 ### Install dependencies
 
 1. `python3 -m pip install pipenv`
-2. `pipenv shell`
+2. `pipenv install`
+3. Install docker
 
-## Running the server
+### Local development
 
-To run the server, use the following command: `python3 manage.py runserver`.
+#### Run locally
 
-## Using the Postman collection
+1. Run `./start_db.sh` (this command will start a local database )
+2. Run `pipenv install`
+3. Move `.env.local` to `.env`
+4. Run `pipenv run python3 manage.py runserver`
 
-The Postman collection in the repo offers two benefits:
-- Server mocking
-- API testing
+You can turn off the database after developing locally using the docker dashboard or `docker stop {container-id}`. You
+can find the container-id by running `./start_db.sh` which will tell you that it cannot start another container because:
 
-### Server mocking
+```
+The container name "/parlay-island-db" is already in use by container "{container-id}"
+```
 
-Currently, the collection in this repository is being mocked at the following
-URL: `https://80066165-a2ae-4dcd-9ffa-f7a164492c69.mock.pstmn.io`. As endpoints
-are added to the mock API, these endpoints will be accessible at this URL.
+### Deployment configuration
 
-Later in the project, the Postman collection will be used to test the API as a
-part of the project's CI.
+In the instances of each deployment, the variables defined in `.env.local` must be defined in the deployment 
+environment.
