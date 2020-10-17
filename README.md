@@ -21,3 +21,15 @@ Written in Django.
 2. Run `pipenv install`
 3. Move `.env.local` to `.env`
 4. Run `pipenv run python3 manage.py runserver`
+
+You can turn off the database after developing locally using the docker dashboard or `docker stop {container-id}`. You
+can find the container-id by running `./start_db.sh` which will tell you that it cannot start another container because:
+
+```
+The container name "/parlay-island-db" is already in use by container "{container-id}"
+```
+
+### Deployment configuration
+
+In the instances of each deployment, the variables defined in `.env.local` must be defined in the deployment 
+environment.
