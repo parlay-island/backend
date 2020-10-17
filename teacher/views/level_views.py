@@ -7,8 +7,11 @@ from teacher.views import get_paginated_results
 
 PAGE_SIZE = 10
 
+
 def levels_controller(request):
-    return JsonResponse({}, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        return get_levels(request)
+    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def level_results_controller(request, level):
@@ -33,3 +36,7 @@ def get_results_by_level(request, level):
     if page_number is not None:
         results_serialized = get_paginated_results(results_serialized, PAGE_SIZE, page_number)
     return JsonResponse({'results': results_serialized}, safe=False, status=status.HTTP_200_OK)
+
+
+def get_levels(request):
+    return JsonResponse({}, status=status.HTTP_200_OK)

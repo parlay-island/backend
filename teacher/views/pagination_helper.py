@@ -8,6 +8,7 @@ TAGS = 'tags'
 ANSWER = 'answer'
 TAG = 'tag'
 
+
 class BadRequestException(Exception):
     pass
 

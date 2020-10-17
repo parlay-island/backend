@@ -7,6 +7,7 @@ from teacher.views import get_paginated_results
 
 PAGE_SIZE = 10
 
+
 def results_controller(request):
     if request.method == 'GET':
         return get_all_results(request)
