@@ -23,6 +23,8 @@ deploy_to_stage:
     name: staging
   script:
     - brew install awsebcli
+    - pipenv install
+    - pipenv run python3 manage.py migrate
     - eb deploy parlay-island-server-dev
   only:
     - master
