@@ -28,3 +28,8 @@ class Result(models.Model):
     # this will later be foreign key to player table
     player_id = models.IntegerField(default=0)
     # later have method to get player name
+
+
+class Level(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=500, default="")

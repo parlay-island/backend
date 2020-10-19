@@ -22,9 +22,10 @@ import teacher.health
 urlpatterns = [
     path('', teacher.health.health_check),
     path('admin/', admin.site.urls),
-    path('questions/', teacher.views.questions_controller),
-    path('questions/<int:questionId>', teacher.views.question_controller),
-    path('results/summary/', teacher.views.results_controller),
-    path('levels/<int:level>/results/', teacher.views.level_results_controller),
-    path('units/', teacher.views.units_controller)
+    path('questions/', teacher.views.question_view.questions_controller),
+    path('questions/<int:questionId>', teacher.views.question_view.question_controller),
+    path('results/summary/', teacher.views.result_view.results_controller),
+    path('levels/<int:level>/results/', teacher.views.level_views.level_results_controller),
+    path('units/', teacher.views.level_views.units_controller),
+    path('levels/', teacher.views.level_views.levels_controller)
 ]
