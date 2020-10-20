@@ -15,7 +15,7 @@ def levels_controller(request):
         return get_levels(request)
     if request.method == 'POST':
         return post_level(request)
-    return JsonResponse({'error', 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def level_controller(request, level_id):
@@ -23,13 +23,13 @@ def level_controller(request, level_id):
         return get_level(request, level_id)
     if request.method == 'DELETE':
         return delete_level(request, level_id)
-    return JsonResponse({'error', 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def level_results_controller(request, level):
     if request.method == 'GET':
         return get_results_by_level(request, level)
-    return JsonResponse({'error', 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def units_controller(request):
@@ -68,7 +68,7 @@ def post_level(request):
 
 def delete_level(request, level_id):
     if not Level.objects.filter(id=level_id).exists():
-        return JsonResponse({}, safe=False, status=status.HTTP_404_NOT_FOUND)
+        return JsonResponse({'error': 'No question found with id [%d]' % level_id}, safe=False, status=status.HTTP_404_NOT_FOUND)
 
     level = Level.objects.get(pk=level_id)
     level_serialized = LevelSerializer.serialize(level)

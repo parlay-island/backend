@@ -26,3 +26,19 @@ class LevelTestCase(TestCase):
         level_id = self.level1.id
         self.client.delete('/levels/%d/' % level_id)
         assert_that(Level.objects.filter(id=level_id), has_length(0))
+
+    def test_get_specific_level(self):
+        res = json.loads(self.client.get('/levels/%d/' % self.level1.id).content)
+        assert_that(res, has_entries(LevelSerializer.serialize(self.level1)))
+
+    def test_delete_level_not_found(self):
+        assert_that(self.client.delete('/levels/15/').status_code, is_(404))
+
+    def test_get_level_not_found(self):
+        assert_that(self.client.delete('/levels/15/').status_code, is_(404))
+
+    def test_level_method_not_supported(self):
+        assert_that(self.client.patch('/levels/15/').status_code, is_(405))
+
+    def test_levels_method_not_supported(self):
+        assert_that(self.client.patch('/levels/').status_code, is_(405))
