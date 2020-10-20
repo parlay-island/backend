@@ -33,7 +33,12 @@ APPEND_SLASH=False
 ALLOWED_HOSTS = ['*']
 
 
-# Application definition
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=teacher',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'teacher.apps.TeacherConfig',
     'corsheaders',
+    'django_nose'
 ]
 
 MIDDLEWARE = [
