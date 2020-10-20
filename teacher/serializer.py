@@ -32,4 +32,6 @@ class ResultSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def serialize(result):
-        return ResultSerializer(result).data
+        result_map = ResultSerializer(result).data
+        result_map['player_name'] = result.get_player_name()
+        return result_map
