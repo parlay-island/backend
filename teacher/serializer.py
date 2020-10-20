@@ -35,6 +35,7 @@ class ResultSerializer(serializers.ModelSerializer):
     def serialize(result):
         result_map = ResultSerializer(result).data
         level_id = LevelSerializer.serialize(result.level)['id']
+        result_map['player_name'] = result.get_player_name()
         result_map['level'] = level_id
         return result_map
 
@@ -47,3 +48,4 @@ class LevelSerializer(serializers.ModelSerializer):
     @staticmethod
     def serialize(result):
         return LevelSerializer(result).data
+

@@ -32,4 +32,7 @@ class Result(models.Model):
     distance = models.FloatField(default=0.0)
     # this will later be foreign key to player table
     player_id = models.IntegerField(default=0)
-    # later have method to get player name
+    
+    # later have this access the name from the Player Object
+    def get_player_name(self):
+        return str(self.player_id)
