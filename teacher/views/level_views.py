@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework import status
 
 from teacher.models import Result, Level
-from teacher.serializer import ResultSerializer
+from teacher.serializer import ResultSerializer, LevelSerializer
 from teacher.views import get_paginated_results
 
 PAGE_SIZE = 10
@@ -30,10 +30,8 @@ def units_controller(request):
 
 
 def get_results_by_level(request, level):
-    if len(Level.objects.filter(id=level)) > 0:
-        results = Result.objects.filter(level=Level.objects.get(id=level)).order_by('-distance')
-    else:
-        results = []
+    results = Result.objects.filter(level=Level.objects.get(id=level)).order_by('-distance') \
+        if len(Level.objects.filter(id=level)) > 0 else []
     page_number = request.GET.get('page')
     results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
     if page_number is not None:
@@ -42,4 +40,6 @@ def get_results_by_level(request, level):
 
 
 def get_levels(request):
-    return JsonResponse({}, status=status.HTTP_200_OK)
+    levels = Level.objects.all()
+    levels_serialized = list(map(lambda level: LevelSerializer.serialize(level), levels))
+    return JsonResponse({'levels': levels_serialized}, safe=False, status=status.HTTP_200_OK)
