@@ -21,15 +21,15 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
 
+class Level(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=500, default="")
+
+
 class Result(models.Model):
     id = models.AutoField(primary_key=True)
-    level = models.IntegerField(default=0)
+    level = models.ForeignKey(Level, on_delete=models.CASCADE)
     distance = models.FloatField(default=0.0)
     # this will later be foreign key to player table
     player_id = models.IntegerField(default=0)
     # later have method to get player name
-
-
-class Level(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=500, default="")
