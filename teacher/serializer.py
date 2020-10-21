@@ -6,13 +6,14 @@ from teacher.models import Question, Choice, Result, Level
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ['id', 'body', 'times_answered', 'times_correct', 'tags', 'answer']
+        fields = ['id', 'body', 'times_answered', 'times_correct', 'tags', 'answer', 'level']
 
     @staticmethod
     def serialize(question):
         question_map = QuestionSerializer(question).data
         choices = list(map(lambda choice: ChoiceSerializer.serialize(choice), question.get_choices()))
         question_map['choices'] = choices
+        question_map['level'] = LevelSerializer.serialize(question.level)['id']
         return question_map
 
 
