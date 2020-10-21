@@ -3,11 +3,9 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
-
 from teacher.models import Question, Choice, Level
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
 from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL
-
 
 def questions_controller(request):
     if request.method == 'GET':
