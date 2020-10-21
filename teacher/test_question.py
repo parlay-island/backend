@@ -79,3 +79,7 @@ class QuestionTestCase(TestCase):
     def test_get_questions_by_tag_doesnt_include_untagged(self):
         assert_that(json.loads(self.client.get('/questions/?tag=%s' % 'bad tag').content)['questions'],
                     has_length(0))
+
+    def test_get_questions_by_level(self):
+        assert_that(json.loads(self.client.get('/questions/?level=%s' % self.level.id).content)['questions'][0],
+                    has_entries(QuestionSerializer.serialize(self.question)))
