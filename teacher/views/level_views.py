@@ -8,6 +8,7 @@ from teacher.serializer import ResultSerializer, LevelSerializer
 from teacher.views import get_paginated_results
 
 PAGE_SIZE = 10
+LEVEL = 'level'
 
 
 def levels_controller(request):

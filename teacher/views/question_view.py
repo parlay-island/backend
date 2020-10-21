@@ -3,16 +3,16 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
-
-from teacher.models import Question, Choice
+from teacher.models import Question, Choice, Level
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
-from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER
-
+from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL
 
 def questions_controller(request):
     if request.method == 'GET':
         if TAG in request.GET:
             return get_questions_by_tag(request, request.GET.get(TAG))
+        elif LEVEL in request.GET:
+            return get_questions_by_level(request, request.GET.get(LEVEL))
         return get_all_questions(request)
     elif request.method == 'POST':
         return post_question(request)
@@ -37,6 +37,12 @@ def get_all_questions(request):
 
 def get_questions_by_tag(request, tag):
     questions = Question.objects.filter(tags__contains=[tag])
+    questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
+    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+
+
+def get_questions_by_level(request, level):
+    questions = Question.objects.filter(level=level)
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
 
@@ -79,7 +85,9 @@ def add_question(question_map):
         times_answered=question_map[TIMES_ANSWERED] if TIMES_ANSWERED in question_map else 0,
         times_correct=question_map[TIMES_CORRECT] if TIMES_CORRECT in question_map else 0,
         tags=question_map[TAGS] if TAGS in question_map else list(),
-        answer=question_map[ANSWER]
+        answer=question_map[ANSWER],
+        level=Level.objects.get(id=question_map[LEVEL]) if len(Level.objects.filter(id=question_map[LEVEL])) > 0
+        else None
     )
     question_serialized = QuestionSerializer.serialize(question)
     return question_serialized, question
@@ -99,10 +107,18 @@ def put_question(request, questionId):
     try:
         question_fields_to_update = json.loads(request.body)
         question = Question.objects.get(pk=questionId)
-        for field, value in question_fields_to_update.items():
+        for field, value in get_validated_update_items(question_fields_to_update):
             setattr(question, field, value)
         question.save()
         return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'No question found with id [%d]' % questionId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
+
+
+def get_validated_update_items(question_fields_to_update):
+    if 'level' in question_fields_to_update:
+        question_fields_to_update['level'] = Level.objects.get(id=question_fields_to_update['level'])
+    if 'choice' in question_fields_to_update:
+        question_fields_to_update['choice'] = Choice.objects.get(id=question_fields_to_update['choice']['id'])
+    return question_fields_to_update.items()
