@@ -13,7 +13,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         question_map = QuestionSerializer(question).data
         choices = list(map(lambda choice: ChoiceSerializer.serialize(choice), question.get_choices()))
         question_map['choices'] = choices
-        question_map['level'] = LevelSerializer.serialize(question.level)['id']
+        question_map['level'] = question.level
         return question_map
 
 
