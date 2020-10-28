@@ -4,6 +4,7 @@ from django.test import TestCase
 from hamcrest import *
 from teacher.models import Result, Level
 from teacher.serializer import ResultSerializer
+from teacher.views import DISTANCE, LEVEL
 from django.test import Client
 
 
@@ -109,3 +110,18 @@ class ResultTestCase(TestCase):
         res = json.loads(self.client.get('/results/summary/?page=%d' % 20).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(1))
+    
+    def test_post_result(self):
+        playerId = 2
+        distance = 500.0
+        levelId = self.level1.id
+        self.client.post('/players/%d/results/' % playerId, data={'distance': distance, 'level': levelId }, content_type='application/json')
+        result_posted = Result.objects.get(player_id=playerId)
+        result_serialized = ResultSerializer.serialize(result_posted)
+        assert_that(result_posted, instance_of(Result))
+        assert_that(result_serialized[DISTANCE], is_(distance))
+        assert_that(result_serialized[LEVEL], is_(levelId))
+    
+    def test_404_for_post_result(self):
+        playerId = 2
+        assert_that(self.client.post('/players/%d/results/' % playerId, data={'distance': 300, 'level': 7}, content_type='application/json').status_code, is_(404))
