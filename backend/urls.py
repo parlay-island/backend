@@ -26,7 +26,6 @@ urlpatterns = [
     path('questions/<int:questionId>', teacher.views.question_view.question_controller),
     path('results/summary/', teacher.views.result_view.results_controller),
     path('levels/<int:level>/results/', teacher.views.level_views.level_results_controller),
-    path('units/', teacher.views.level_views.units_controller),
     path('levels/', teacher.views.level_views.levels_controller),
     path('levels/<int:level_id>/', teacher.views.level_views.level_controller)
 ]
