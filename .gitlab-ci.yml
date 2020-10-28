@@ -22,7 +22,7 @@ deploy_to_stage:
   environment:
     name: staging
   script:
-    - brew install awsebcli
+    - brew install awsebcli || true
     - eb deploy parlay-island-server-dev
   only:
     - master
@@ -35,5 +35,5 @@ deploy_to_prod:
     name: prod
   when: manual
   script:
-    - brew install awsebcli
+    - brew install awsebcli || true
     - eb deploy parlay-island-server-prod
