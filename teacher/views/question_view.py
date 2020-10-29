@@ -106,19 +106,24 @@ def delete_question(request, questionId):
 def put_question(request, questionId):
     try:
         question_fields_to_update = json.loads(request.body)
+        print(question_fields_to_update)
         question = Question.objects.get(pk=questionId)
         for field, value in get_validated_update_items(question_fields_to_update):
             setattr(question, field, value)
+
+        update_question_choices(question.get_choices(), question_fields_to_update['choices'])
         question.save()
         return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'No question found with id [%d]' % questionId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
 
+def update_question_choices(choiceList, updatedChoiceList):
+    for choice, updatedChoice in zip(choiceList, updatedChoiceList):
+        for field, value in updatedChoice.items():
+            setattr(choice, field, value)
 
 def get_validated_update_items(question_fields_to_update):
     if 'level' in question_fields_to_update:
         question_fields_to_update['level'] = Level.objects.get(id=question_fields_to_update['level'])
-    if 'choice' in question_fields_to_update:
-        question_fields_to_update['choice'] = Choice.objects.get(id=question_fields_to_update['choice']['id'])
     return question_fields_to_update.items()
