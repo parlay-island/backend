@@ -106,7 +106,6 @@ def delete_question(request, questionId):
 def put_question(request, questionId):
     try:
         question_fields_to_update = json.loads(request.body)
-        print(question_fields_to_update)
         question = Question.objects.get(pk=questionId)
         for field, value in get_validated_update_items(question_fields_to_update):
             setattr(question, field, value)
