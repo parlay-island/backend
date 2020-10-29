@@ -110,17 +110,28 @@ def put_question(request, questionId):
         for field, value in get_validated_update_items(question_fields_to_update):
             setattr(question, field, value)
 
-        update_question_choices(question.get_choices(), question_fields_to_update['choices'])
+        update_question_choices(question_fields_to_update['choices'])
+
         question.save()
+
         return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'No question found with id [%d]' % questionId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
 
-def update_question_choices(choiceList, updatedChoiceList):
-    for choice, updatedChoice in zip(choiceList, updatedChoiceList):
-        for field, value in updatedChoice.items():
-            setattr(choice, field, value)
+def update_question_choices(updatedChoiceList):
+    for updatedChoice in updatedChoiceList:
+        try:
+            choiceID = updatedChoice['id']
+            choice = Choice.objects.get(id=choiceID)
+            for field, value in updatedChoice.items():
+                setattr(choice, field, value)
+            choice.save()
+        except KeyError:
+            return JsonResponse({'error': 'Choices not specified with id'},
+                                safe=False, status=status.HTTP_404_NOT_FOUND)
+
+
 
 def get_validated_update_items(question_fields_to_update):
     if 'level' in question_fields_to_update:
