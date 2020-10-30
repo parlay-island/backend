@@ -1,7 +1,7 @@
 import json
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Question, Level
+from teacher.models import Question, Level, Choice
 from teacher.serializer import QuestionSerializer
 from django.test import Client
 
@@ -11,6 +11,7 @@ class QuestionTestCase(TestCase):
     client: Client = None
     question: Question = None
     question_tagged: Question = None
+    choice: Choice = None
     id = None
     level = None
 
@@ -26,6 +27,7 @@ class QuestionTestCase(TestCase):
             tags=[self.tag],
             level=self.level
         )
+        self.choice = Choice.objects.create(body='Choice 1', question=self.question)
 
     def test_get_all_questions(self):
         assert_that(json.loads(self.client.get('/questions/').content)['questions'][0],
@@ -48,9 +50,27 @@ class QuestionTestCase(TestCase):
         self.client.put('/questions/%d' % self.question.id,
                         data={'body': body, 'answer': [1], 'level': self.level.id,
                               'choices': [{
+                                  'id': self.choice.id,
                                   'body': 'correct answer'
                               }]}, content_type='application/json')
         assert_that(Question.objects.get(pk=self.question.id).body, is_(body))
+
+    def test_put_questions_with_choices(self):
+        updatedChoice = 'correct answer'
+        timesChosen = 1
+        self.client.put('/questions/%d' % self.question.id,
+                        data={'body': 'body', 'answer': [0], 'level': self.level.id,
+                              'choices': [
+                                  {
+                                      'id': self.choice.id,
+                                      'body': updatedChoice,
+                                      'times_chosen': timesChosen
+                                  },
+                              ]}, content_type='application/json')
+        question = Question.objects.get(pk=self.question.id)
+        for choice in question.get_choices():
+            assert_that(choice.body, is_(updatedChoice))
+            assert_that(choice.times_chosen, is_(timesChosen))
 
     def test_delete_question(self):
         self.client.delete('/questions/%d' % self.question.id)
