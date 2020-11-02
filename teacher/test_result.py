@@ -2,13 +2,14 @@ import json
 import mock
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Result, Level
+from teacher.models import Result, Level, Player
 from teacher.serializer import ResultSerializer
 from teacher.views import DISTANCE, LEVEL
 from django.test import Client
 
 
 class ResultTestCase(TestCase):
+    player = None
     client: Client = None
     level1: Level = None
     level2: Level = None
@@ -19,7 +20,10 @@ class ResultTestCase(TestCase):
     id = None
 
     def setUp(self):
-        self.client: Client = Client()
+        self.client = Client()
+        self.player = Player.objects.create(
+            name="Player"
+        )
         self.level1 = Level.objects.create(
             name="Level 1"
         )
@@ -29,22 +33,22 @@ class ResultTestCase(TestCase):
         self.result1_level1 = Result.objects.create(
             level=self.level1,
             distance=100.0,
-            player_id=0
+            player=self.player
         )
         self.result2_level1 = Result.objects.create(
             level=self.level1,
             distance=200.0,
-            player_id=1
+            player=self.player
         )
         self.result1_level2 = Result.objects.create(
             level=self.level2,
             distance=300.0,
-            player_id=1
+            player=self.player
         )
         self.result2_level2 = Result.objects.create(
             level=self.level2,
             distance=150.0,
-            player_id=0
+            player=self.player
         )
 
     def test_get_all_results_non_paginated(self):
@@ -112,16 +116,19 @@ class ResultTestCase(TestCase):
         assert_that(res, has_length(1))
     
     def test_post_result(self):
-        playerId = 2
+        player = Player.objects.create(name="Player2")
         distance = 500.0
         levelId = self.level1.id
-        self.client.post('/players/%d/results/' % playerId, data={'distance': distance, 'level': levelId }, content_type='application/json')
-        result_posted = Result.objects.get(player_id=playerId)
+        self.client.post('/players/%d/results/' % player.id,
+                         data={'distance': distance, 'level': levelId},
+                         content_type='application/json')
+        result_posted = Result.objects.get(player=player.id)
         result_serialized = ResultSerializer.serialize(result_posted)
         assert_that(result_posted, instance_of(Result))
         assert_that(result_serialized[DISTANCE], is_(distance))
         assert_that(result_serialized[LEVEL], is_(levelId))
     
     def test_404_for_post_result(self):
-        playerId = 2
-        assert_that(self.client.post('/players/%d/results/' % playerId, data={'distance': 300, 'level': 7}, content_type='application/json').status_code, is_(404))
+        assert_that(self.client.post('/players/%d/results/' % self.player.id,
+                                     data={'distance': 300, 'level': 7},
+                                     content_type='application/json').status_code, is_(404))
