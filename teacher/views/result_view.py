@@ -75,7 +75,15 @@ def update_player_accuracy(player):
 def update_responses(responses_request, player):
     response_list = []
     for response_request in responses_request:
-        response_list.append(add_response(response_request, player))
+        new_response = add_response(response_request, player)
+        existing_response_index = next(
+            (i for i, response in enumerate(response_list) if response.id == new_response.id), -1)
+        if existing_response_index > -1:
+            # making sure requests with the same ID aren't shown multiple times with different counts
+            response_list[existing_response_index] = new_response
+        else:
+            response_list.append(new_response)
+
     return response_list
 
 
