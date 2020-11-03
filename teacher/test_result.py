@@ -2,7 +2,7 @@ import json
 import mock
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Result, Level, Player
+from teacher.models import Result, Level, Player, Question, Response
 from teacher.serializer import ResultSerializer
 from teacher.views import DISTANCE, LEVEL
 from django.test import Client
@@ -13,6 +13,7 @@ class ResultTestCase(TestCase):
     client: Client = None
     level1: Level = None
     level2: Level = None
+    question: Question = None
     result1_level1: Result = None
     result2_level1: Result = None
     result1_level2: Result = None
@@ -29,6 +30,10 @@ class ResultTestCase(TestCase):
         )
         self.level2 = Level.objects.create(
             name="Level 2"
+        )
+        self.question = Question.objects.create(
+            body='This is a question',
+            level=self.level1
         )
         self.result1_level1 = Result.objects.create(
             level=self.level1,
@@ -115,20 +120,43 @@ class ResultTestCase(TestCase):
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(1))
     
-    def test_post_result(self):
+    def test_post_result_without_question_specific_data(self):
         player = Player.objects.create(name="Player2")
         distance = 500.0
-        levelId = self.level1.id
         self.client.post('/players/%d/results/' % player.id,
-                         data={'distance': distance, 'level': levelId},
+                         data={'distance': distance, 'level': self.level1.id},
                          content_type='application/json')
         result_posted = Result.objects.get(player=player.id)
         result_serialized = ResultSerializer.serialize(result_posted)
         assert_that(result_posted, instance_of(Result))
         assert_that(result_serialized[DISTANCE], is_(distance))
-        assert_that(result_serialized[LEVEL], is_(levelId))
+        assert_that(result_serialized[LEVEL], is_(self.level1.id))
+
+    def test_post_result_with_question_specific_data(self):
+        player = Player.objects.create(name="Player2")
+        distance = 500.0
+        choice = 1
+        self.client.post('/players/%d/results/' % player.id,
+                         data={'distance': distance,
+                               'level': self.level1.id,
+                               'questions': [
+                                   {
+                                       'question_id': self.question.id,
+                                       'choice_id': choice
+                                   }
+                               ]},
+                         content_type='application/json')
+        responses = Response.objects.filter(question=self.question)
+        assert_that(responses, has_length(1))
+        assert_that(responses[0].choice, choice)
+        assert_that(responses[0].count, 1)
     
     def test_404_for_post_result(self):
         assert_that(self.client.post('/players/%d/results/' % self.player.id,
                                      data={'distance': 300, 'level': 7},
+                                     content_type='application/json').status_code, is_(404))
+
+    def test_404_for_post_result_when_player_not_present(self):
+        assert_that(self.client.post('/players/%d/results/' % 315,
+                                     data={'distance': 300, 'level': self.level1.id},
                                      content_type='application/json').status_code, is_(404))
