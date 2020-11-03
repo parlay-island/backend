@@ -43,8 +43,12 @@ class Choice(models.Model):
 
 
 class Response(models.Model):
+    class Meta:
+        index_together = ["player", "question",
+                          "choice"]
+
     id = models.AutoField(primary_key=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
-    choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    choice = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
