@@ -15,6 +15,8 @@ NAME = 'name'
 def players_controller(request):
     if request.method == 'POST':
         return post_player(request)
+    if request.method == 'GET':
+        return get_all_players(request)
     return JsonResponse({'error': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
@@ -35,6 +37,11 @@ def player_results_controller(request, playerId):
         return get_results(request, player)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+def get_all_players(request):
+    players = Player.objects.order_by('name').all()
+    players_serialized = list(
+        map(lambda player: PlayerSerializer.serialize(player), players))
+    return JsonResponse({'players': players_serialized}, safe=False, status=status.HTTP_200_OK)
 
 def get_results(request, player):
     responses = Response.objects.filter(player=player)
