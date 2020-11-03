@@ -53,10 +53,12 @@ def post_result(request, player):
 def update_player_accuracy(player):
     responses = Response.objects.filter(player=player.id)
     num_questions_correct = 0
+    total = 0
     for response in responses:
+        total += response.count
         if response.get_is_correct():
-            num_questions_correct += 1
-    accuracy = (num_questions_correct / len(responses)) * 100
+            num_questions_correct += response.count
+    accuracy = (num_questions_correct / total) * 100
     setattr(player, ACCURACY, accuracy)
     player.save()
 
