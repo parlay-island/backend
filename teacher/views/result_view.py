@@ -18,10 +18,6 @@ def results_controller(request):
         return get_all_results(request)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-def player_results_controller(request, playerId):
-    if request.method == 'POST':
-        return post_result(request, playerId)
-    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 def get_all_results(request):
     results = Result.objects.order_by('-distance').all()
@@ -33,13 +29,13 @@ def get_all_results(request):
             results_serialized, PAGE_SIZE, page_number)
     return JsonResponse({'results': results_serialized}, safe=False, status=status.HTTP_200_OK)
 
-# when player is created will need to update the player_id in the create
-def post_result(request, playerId):
+
+def post_result(request, player):
     payload = json.loads(request.body)
     try:
         result = Result.objects.create(
             distance=payload[DISTANCE],
-            player_id=playerId,
+            player=player,
             level=Level.objects.get(id=payload[LEVEL]) 
         )
         result_serialized = ResultSerializer.serialize(result)
