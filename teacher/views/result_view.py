@@ -42,13 +42,10 @@ def post_result(request, player):
             player=player,
             level=Level.objects.get(id=payload[LEVEL]) 
         )
-<<<<<<< HEAD
 
-        update_player_accuracy(player)
-=======
->>>>>>> added distance and level back to response
-        result_serialized = ResultSerializer.serialize(result)
         response_list = update_responses(payload[QUESTIONS], player)
+        update_player_accuracy(player)
+        result_serialized = ResultSerializer.serialize(result)
         response_serialized = [ResponseSerializer.serialize(response) for response in response_list]
         return JsonResponse({'distance': result_serialized[DISTANCE], 'level': result_serialized[LEVEL],
                              'question_results': response_serialized}, safe=False, status=status.HTTP_201_CREATED)
