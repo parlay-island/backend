@@ -58,7 +58,10 @@ def update_player_accuracy(player):
         total += response.count
         if response.get_is_correct():
             num_questions_correct += response.count
-    accuracy = (num_questions_correct / total) * 100
+    if(total is 0):
+        accuracy = 100.0
+    else:
+        accuracy = (num_questions_correct / total) * 100
     setattr(player, ACCURACY, accuracy)
     player.save()
 
