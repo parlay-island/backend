@@ -160,3 +160,18 @@ class ResultTestCase(TestCase):
         assert_that(self.client.post('/players/%d/results/' % 315,
                                      data={'distance': 300, 'level': self.level1.id},
                                      content_type='application/json').status_code, is_(404))
+
+    def test_get_results_by_level(self):
+        Response.objects.create(question=self.question, choice=0, player=self.player)
+        res = json.loads(self.client.get('/players/%d/results/?level=%d' % (self.player.id, self.level1.id))
+                         .content)['results']
+        assert_that(res[0]['question'], is_(self.question.id))
+
+    def test_get_results_by_level_with_wrong_level(self):
+        Response.objects.create(question=self.question, choice=0, player=self.player)
+        res = json.loads(self.client.get('/players/%d/results/?level=%d' % (self.player.id, 3))
+                         .content)['results']
+        assert_that(res, has_length(0))
+
+    def test_404_for_player_not_present_on_get_results_by_level(self):
+        assert_that(self.client.get('/players/%d/results/?level=%d' % (958, 3)).status_code, is_(404))

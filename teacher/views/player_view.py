@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
 
-from teacher.models import Player, Response
+from teacher.models import Player, Response, Level, Question
 from teacher.serializer import ResponseSerializer, PlayerSerializer
 from teacher.views import post_result
 
@@ -30,12 +30,22 @@ def player_results_controller(request, playerId):
     if request.method == 'POST':
         return post_result(request, player)
     elif request.method == 'GET':
+        if request.GET.get(LEVEL):
+            return get_results_by_level(request, player)
         return get_results(request, player)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def get_results(request, player):
     responses = Response.objects.filter(player=player)
+    response_list = [ResponseSerializer.serialize(response=response) for response in responses]
+    return JsonResponse({'results': response_list}, status=status.HTTP_200_OK)
+
+
+def get_results_by_level(request, player):
+    responses = Response.objects.filter(
+        question__in=Question.objects.filter(level__id=request.GET.get(LEVEL),),
+        player=player)
     response_list = [ResponseSerializer.serialize(response=response) for response in responses]
     return JsonResponse({'results': response_list}, status=status.HTTP_200_OK)
 
