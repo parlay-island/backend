@@ -148,8 +148,8 @@ class ResultTestCase(TestCase):
                          content_type='application/json')
         responses = Response.objects.filter(question=self.question)
         assert_that(responses, has_length(1))
-        assert_that(responses[0].choice, choice)
-        assert_that(responses[0].count, 1)
+        assert_that(responses[0].choice, is_(choice))
+        assert_that(responses[0].count, is_(1))
     
     def test_404_for_post_result(self):
         assert_that(self.client.post('/players/%d/results/' % self.player.id,
