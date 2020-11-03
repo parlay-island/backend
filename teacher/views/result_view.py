@@ -4,8 +4,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
 
+
 from teacher.models import Result, Level, Question, Response, Player
-from teacher.serializer import ResultSerializer
+from teacher.serializer import ResultSerializer, ResponseSerializer
 from teacher.views import get_paginated_results, LEVEL
 
 PAGE_SIZE = 10
@@ -41,10 +42,12 @@ def post_result(request, player):
             player=player,
             level=Level.objects.get(id=payload[LEVEL]) 
         )
-        update_responses(payload[QUESTIONS], player)
+
         update_player_accuracy(player)
         result_serialized = ResultSerializer.serialize(result)
-        return JsonResponse({'results': result_serialized}, safe=False, status=status.HTTP_201_CREATED)
+        response_list = update_responses(payload[QUESTIONS], player)
+        response_serialized = [ResponseSerializer.serialize(response) for response in response_list]
+        return JsonResponse({'results': response_serialized}, safe=False, status=status.HTTP_201_CREATED)
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except KeyError as e:
@@ -66,8 +69,10 @@ def update_player_accuracy(player):
     player.save()
 
 def update_responses(responses_request, player):
+    response_list = []
     for response_request in responses_request:
-        add_response(response_request, player)
+        response_list.append(add_response(response_request, player))
+    return response_list
 
 
 def add_response(response_request, player):
@@ -76,3 +81,4 @@ def add_response(response_request, player):
     response, created = Response.objects.get_or_create(player=player, question=question, choice=choice)
     response.count += 1
     response.save()
+    return response
