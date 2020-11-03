@@ -7,16 +7,19 @@ class Level(models.Model):
     name = models.CharField(max_length=500, default="")
 
 
+class Player(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=400, default="")
+
+
 class Result(models.Model):
     id = models.AutoField(primary_key=True)
     level = models.ForeignKey(Level, on_delete=models.CASCADE)
     distance = models.FloatField(default=0.0)
-    # this will later be foreign key to player table
-    player_id = models.IntegerField(default=0)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
 
-    # later have this access the name from the Player Object
     def get_player_name(self):
-        return str(self.player_id)
+        return self.player.name
 
 
 class Question(models.Model):
@@ -37,3 +40,15 @@ class Choice(models.Model):
     body = models.CharField(max_length=500, default="")
     times_chosen = models.IntegerField(default=0)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+
+class Response(models.Model):
+    class Meta:
+        index_together = ["player", "question",
+                          "choice"]
+
+    id = models.AutoField(primary_key=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    choice = models.IntegerField(default=0)
+    count = models.IntegerField(default=0)
