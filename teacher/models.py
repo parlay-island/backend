@@ -10,6 +10,7 @@ class Level(models.Model):
 class Player(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=400, default="")
+    accuracy = models.FloatField(default=100.0)
 
 
 class Result(models.Model):
@@ -52,3 +53,7 @@ class Response(models.Model):
     player = models.ForeignKey(Player, on_delete=models.CASCADE)
     choice = models.IntegerField(default=0)
     count = models.IntegerField(default=0)
+    
+    def get_is_correct(self):
+        return len(Question.objects.filter(id=self.question.id, answer__contains=[self.choice])) > 0
+

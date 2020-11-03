@@ -33,7 +33,13 @@ class ResultTestCase(TestCase):
         )
         self.question = Question.objects.create(
             body='This is a question',
-            level=self.level1
+            level=self.level1,
+            answer=[0]
+        )
+        self.question2 = Question.objects.create(
+            body='This is a question2',
+            level=self.level1,
+            answer=[1]
         )
         self.result1_level1 = Result.objects.create(
             level=self.level1,
@@ -55,6 +61,18 @@ class ResultTestCase(TestCase):
             distance=150.0,
             player=self.player
         )
+
+    def result_post_request(self, choice, distance, player, question_id):
+        self.client.post('/players/%d/results/' % player.id,
+                         data={'distance': distance,
+                               'level': self.level1.id,
+                               'questions': [
+                                   {
+                                       'question_id': question_id,
+                                       'choice_id': choice
+                                   }
+                               ]},
+                         content_type='application/json')
 
     def test_get_all_results_non_paginated(self):
         res = json.loads(self.client.get('/results/summary/').content)['results']
@@ -136,21 +154,29 @@ class ResultTestCase(TestCase):
         player = Player.objects.create(name="Player2")
         distance = 500.0
         choice = 1
-        self.client.post('/players/%d/results/' % player.id,
-                         data={'distance': distance,
-                               'level': self.level1.id,
-                               'questions': [
-                                   {
-                                       'question_id': self.question.id,
-                                       'choice_id': choice
-                                   }
-                               ]},
-                         content_type='application/json')
+        self.result_post_request(choice, distance, player, self.question.id)
         responses = Response.objects.filter(question=self.question)
         assert_that(responses, has_length(1))
         assert_that(responses[0].choice, is_(choice))
         assert_that(responses[0].count, is_(1))
     
+    def test_accuracy_updates_on_result_post(self):
+        player = Player.objects.create(name="Player3")
+        initial_accuracy = player.accuracy
+        distance = 500.0
+        choice = 1
+        self.result_post_request(choice, distance, player, self.question.id)
+        updated_accuracy = Player.objects.get(id=player.id).accuracy
+        assert_that(initial_accuracy, is_(100))
+        assert_that(updated_accuracy, is_(0))
+        self.result_post_request(choice, distance, player, self.question2.id)
+        updated_accuracy = Player.objects.get(id=player.id).accuracy
+        assert_that(updated_accuracy, is_(50))
+        self.result_post_request(0, distance, player, self.question.id)
+        updated_accuracy = Player.objects.get(id=player.id).accuracy
+        assert_that(updated_accuracy, is_((2/3) * 100))
+
+
     def test_404_for_post_result(self):
         assert_that(self.client.post('/players/%d/results/' % self.player.id,
                                      data={'distance': 300, 'level': 7},

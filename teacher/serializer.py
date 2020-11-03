@@ -58,13 +58,15 @@ class ResponseSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def serialize(response):
-        return ResponseSerializer(response).data
+        response_map = ResponseSerializer(response).data
+        response_map['is_correct'] = response.get_is_correct()
+        return response_map
 
 
 class PlayerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'accuracy']
 
     @staticmethod
     def serialize(player):
