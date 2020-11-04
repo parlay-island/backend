@@ -20,7 +20,9 @@ def players_controller(request):
     return JsonResponse({'error': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-def player_controller(request):
+def player_controller(request, playerId):
+    if request.method == 'GET':
+        return get_single_player(request, playerId)
     return JsonResponse({'error': 'Not implemented'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
@@ -36,6 +38,14 @@ def player_results_controller(request, playerId):
             return get_results_by_level(request, player)
         return get_results(request, player)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def get_single_player(request, playerId):
+    try:
+        player = Player.objects.get(id=playerId)
+        return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_200_OK)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'error': 'No player found with id [%d]' % playerId},
+                            safe=False, status=status.HTTP_404_NOT_FOUND)
 
 def get_all_players(request):
     players = Player.objects.order_by('name').all()
