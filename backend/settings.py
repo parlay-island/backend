@@ -68,7 +68,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication'
+        'rest_framework.authentication.SessionAuthentication'
     ]
 }
 
@@ -144,7 +144,8 @@ DJOSER = {
     "SEND_ACTIVATION_EMAIL": False,
     "PASSWORD_RESET_CONFIRM_URL": "#/password/reset/confirm/{uid}/{token}",
     "USERNAME_RESET_CONFIRM_URL": "#/username/reset/confirm/{uid}/{token}",
-    "ACTIVATION_URL": "#/activate/{uid}/{token}"
+    "ACTIVATION_URL": "#/activate/{uid}/{token}",
+    'CREATE_SESSION_ON_LOGIN': True,
 }
 
 # Internationalization
