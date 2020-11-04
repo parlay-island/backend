@@ -42,8 +42,14 @@ class Level(models.Model):
     name = models.CharField(max_length=500, default="")
 
 
+class Teacher(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+
 class Player(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=400, default="")
     accuracy = models.FloatField(default=100.0)
 
