@@ -1,5 +1,34 @@
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+
+
+class UserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(
+        self, username, email=None, password=None, **extra_fields
+    ):
+        if not username:
+            raise ValueError("The given custom_username must be set")
+        email = self.normalize_email(email)
+        username = self.model.normalize_username(username)
+        user = self.model(custom_username=username, custom_email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractBaseUser):
+    username = models.CharField(max_length=150)
+    email = models.EmailField(blank=True)
+    is_teacher = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    objects = UserManager()
+
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email", "is_teacher"]
 
 
 class Level(models.Model):

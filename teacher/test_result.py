@@ -176,7 +176,6 @@ class ResultTestCase(TestCase):
         updated_accuracy = Player.objects.get(id=player.id).accuracy
         assert_that(updated_accuracy, is_((2/3) * 100))
 
-
     def test_404_for_post_result(self):
         assert_that(self.client.post('/players/%d/results/' % self.player.id,
                                      data={'distance': 300, 'level': 7},

@@ -28,10 +28,11 @@ SECRET_KEY = getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = getenv('DEBUG') == 'True'
-APPEND_SLASH=False
+APPEND_SLASH = False
 
 ALLOWED_HOSTS = ['*']
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
@@ -49,7 +50,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'teacher.apps.TeacherConfig',
     'corsheaders',
-    'django_nose'
+    'django_nose',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +65,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication'
+    ]
+}
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -108,6 +118,9 @@ DATABASES = {
     }
 }
 
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend"
+]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -127,6 +140,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DJOSER = {
+    "SEND_ACTIVATION_EMAIL": False,
+    "PASSWORD_RESET_CONFIRM_URL": "#/password/reset/confirm/{uid}/{token}",
+    "USERNAME_RESET_CONFIRM_URL": "#/username/reset/confirm/{uid}/{token}",
+    "ACTIVATION_URL": "#/activate/{uid}/{token}"
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
