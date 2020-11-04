@@ -17,6 +17,10 @@ class UserManager(BaseUserManager):
         user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
+        if user.is_teacher:
+            teacher = Teacher.objects.create(user=user)
+        else:
+            player = Player.objects.create(user=user, name=user.username)
         return user
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
