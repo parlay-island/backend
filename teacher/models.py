@@ -1,4 +1,5 @@
-from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -10,17 +11,22 @@ class UserManager(BaseUserManager):
         self, username, email=None, password=None, **extra_fields
     ):
         if not username:
-            raise ValueError("The given custom_username must be set")
+            raise ValueError("The given username must be set")
         email = self.normalize_email(email)
         username = self.model.normalize_username(username)
-        user = self.model(custom_username=username, custom_email=email, **extra_fields)
+        user = self.model(username=username, email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(username, email, password, **extra_fields)
 
-class User(AbstractBaseUser):
-    username = models.CharField(max_length=150)
+
+class User(AbstractUser):
+    username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(blank=True)
     is_teacher = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
