@@ -12,6 +12,12 @@ LEVEL = 'level'
 NAME = 'name'
 
 
+def me_controller(request):
+    if request.method == 'GET':
+        return serialize_me(request)
+    return JsonResponse({'error' : 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
 def players_controller(request):
     if request.method == 'POST':
         return post_player(request)
@@ -71,3 +77,13 @@ def post_player(request):
     payload = json.loads(request.body)
     player = Player.objects.create(name=payload[NAME])
     return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_201_CREATED)
+
+
+def serialize_me(request):
+    user = request.user
+    try:
+        player = Player.objects.get(user=user)
+        return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_200_OK)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'error': 'You do not have an associated player account'},
+                            status=status.HTTP_401_UNAUTHORIZED)

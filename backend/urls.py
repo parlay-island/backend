@@ -29,8 +29,10 @@ urlpatterns = [
     path('questions/<int:questionId>', teacher.views.question_view.question_controller),
     path('results/summary/', teacher.views.result_view.results_controller),
     path('players/', teacher.views.player_view.players_controller),
+    path('players/me/', teacher.views.player_view.me_controller),
     path('players/<int:playerId>/', teacher.views.player_view.player_controller),
     path('players/<int:playerId>/results/', teacher.views.player_view.player_results_controller),
+    path('teachers/me/', teacher.views.teacher_view.me_controller),
     path('levels/<int:level>/results/', teacher.views.level_views.level_results_controller),
     path('levels/', teacher.views.level_views.levels_controller),
     path('levels/<int:level_id>/', teacher.views.level_views.level_controller)
