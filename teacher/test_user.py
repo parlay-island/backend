@@ -49,3 +49,9 @@ class UserTestCase(TestCase):
         self.client.post('/auth/token/login/', {'username': self.player_username,
                                                 'password': self.password})
         assert_that(self.client.get('/teachers/me/').status_code, is_(401))
+
+    def test_player_me_unauthenticated(self):
+        assert_that(self.client.get('/players/me/').status_code, is_(401))
+
+    def test_teacher_me_unauthenticated(self):
+        assert_that(self.client.get('/teachers/me/').status_code, is_(401))

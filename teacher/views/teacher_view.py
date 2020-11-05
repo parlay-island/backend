@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
@@ -14,6 +15,8 @@ def me_controller(request):
 
 def serialize_me(request):
     user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'error': 'You are not logged in'}, status=status.HTTP_401_UNAUTHORIZED)
     try:
         teacher = Teacher.objects.get(user=user)
         return JsonResponse(TeacherSerializer.serialize(teacher), status=status.HTTP_200_OK)
