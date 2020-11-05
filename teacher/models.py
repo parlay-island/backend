@@ -1,5 +1,44 @@
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+
+
+class ParlayUserManager(BaseUserManager):
+    use_in_migrations = True
+
+    def create_user(
+        self, username, email=None, password=None, **extra_fields
+    ):
+        if not username:
+            raise ValueError("The given username must be set")
+        email = self.normalize_email(email)
+        username = self.model.normalize_username(username)
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        if user.is_teacher:
+            teacher = Teacher.objects.create(user=user)
+        else:
+            player = Player.objects.create(user=user, name=user.username)
+        return user
+
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(username, email, password, **extra_fields)
+
+
+class ParlayUser(AbstractUser):
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(blank=True)
+    is_teacher = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    objects = ParlayUserManager()
+
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email", "is_teacher"]
 
 
 class Level(models.Model):
@@ -7,8 +46,14 @@ class Level(models.Model):
     name = models.CharField(max_length=500, default="")
 
 
+class Teacher(models.Model):
+    id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE)
+
+
 class Player(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=400, default="")
     accuracy = models.FloatField(default=100.0)
 
