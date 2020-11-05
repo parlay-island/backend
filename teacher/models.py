@@ -49,6 +49,7 @@ class Level(models.Model):
 class Teacher(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=400, default="")
 
 
 class Player(models.Model):
