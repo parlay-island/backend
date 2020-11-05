@@ -16,6 +16,7 @@ mock = "*"
 python-dotenv = "*"
 django-nose = "*"
 coverage = "*"
+djoser = "*"
 
 [requires]
 python_version = "3.7"
