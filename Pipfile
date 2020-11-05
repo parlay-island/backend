@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 django = "*"
-djangorestframework = "*"
+djangorestframework = "3.12.2"
 pyhamcrest = "*"
 gunicorn = "*"
 django-cors-headers = "*"
@@ -16,6 +16,7 @@ mock = "*"
 python-dotenv = "*"
 django-nose = "*"
 coverage = "*"
+djoser = "*"
 
 [requires]
 python_version = "3.7"
