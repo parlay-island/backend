@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
 
-class UserManager(BaseUserManager):
+class ParlayUserManager(BaseUserManager):
     use_in_migrations = True
 
     def create_user(
@@ -29,12 +29,12 @@ class UserManager(BaseUserManager):
         return self.create_user(username, email, password, **extra_fields)
 
 
-class User(AbstractUser):
+class ParlayUser(AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(blank=True)
     is_teacher = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    objects = UserManager()
+    objects = ParlayUserManager()
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
@@ -48,12 +48,12 @@ class Level(models.Model):
 
 class Teacher(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE)
 
 
 class Player(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
+    user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=400, default="")
     accuracy = models.FloatField(default=100.0)
 
