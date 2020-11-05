@@ -18,7 +18,7 @@ class ParlayUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         if user.is_teacher:
-            teacher = Teacher.objects.create(user=user)
+            teacher = Teacher.objects.create(user=user, name=user.username)
         else:
             player = Player.objects.create(user=user, name=user.username)
         return user
