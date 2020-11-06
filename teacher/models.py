@@ -18,7 +18,7 @@ class ParlayUserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         if user.is_teacher:
-            teacher = Teacher.objects.create(user=user)
+            teacher = Teacher.objects.create(user=user, name=user.username)
         else:
             player = Player.objects.create(user=user, name=user.username)
         return user
@@ -49,6 +49,7 @@ class Level(models.Model):
 class Teacher(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.OneToOneField(ParlayUser, on_delete=models.CASCADE)
+    name = models.CharField(max_length=400, default="")
 
 
 class Player(models.Model):

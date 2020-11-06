@@ -3,3 +3,4 @@ from teacher.views.level_views import *
 from teacher.views.result_view import *
 from teacher.views.question_view import *
 from teacher.views.player_view import *
+from teacher.views.teacher_view import *
