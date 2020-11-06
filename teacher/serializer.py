@@ -71,3 +71,13 @@ class PlayerSerializer(serializers.ModelSerializer):
     @staticmethod
     def serialize(player):
         return PlayerSerializer(player).data
+
+
+class TeacherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Player
+        fields = ['id', 'name']
+
+    @staticmethod
+    def serialize(player):
+        return TeacherSerializer(player).data

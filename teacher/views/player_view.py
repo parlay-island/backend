@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
@@ -10,6 +11,12 @@ from teacher.views import post_result
 
 LEVEL = 'level'
 NAME = 'name'
+
+
+def me_controller(request):
+    if request.method == 'GET':
+        return serialize_me(request)
+    return JsonResponse({'error' : 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 def players_controller(request):
@@ -39,6 +46,7 @@ def player_results_controller(request, playerId):
         return get_results(request, player)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+
 def get_single_player(request, playerId):
     try:
         player = Player.objects.get(id=playerId)
@@ -47,11 +55,13 @@ def get_single_player(request, playerId):
         return JsonResponse({'error': 'No player found with id [%d]' % playerId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
 
+
 def get_all_players(request):
     players = Player.objects.order_by('name').all()
     players_serialized = list(
         map(lambda player: PlayerSerializer.serialize(player), players))
     return JsonResponse({'players': players_serialized}, safe=False, status=status.HTTP_200_OK)
+
 
 def get_results(request, player):
     responses = Response.objects.filter(player=player)
@@ -71,3 +81,15 @@ def post_player(request):
     payload = json.loads(request.body)
     player = Player.objects.create(name=payload[NAME])
     return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_201_CREATED)
+
+
+def serialize_me(request):
+    user = request.user
+    try:
+        if not user.is_authenticated:
+            return JsonResponse({'error': 'You are not logged in'}, status=status.HTTP_401_UNAUTHORIZED)
+        player = Player.objects.get(user=user)
+        return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_200_OK)
+    except ObjectDoesNotExist as e:
+        return JsonResponse({'error': 'You do not have an associated player account'},
+                            status=status.HTTP_401_UNAUTHORIZED)
