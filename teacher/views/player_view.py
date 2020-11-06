@@ -1,5 +1,6 @@
 import json
 
+from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -82,7 +83,7 @@ def post_player(request):
     player = Player.objects.create(name=payload[NAME])
     return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_201_CREATED)
 
-
+@api_view()
 def serialize_me(request):
     user = request.user
     try:
