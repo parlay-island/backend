@@ -1,3 +1,4 @@
+from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
@@ -12,7 +13,7 @@ def me_controller(request):
         return serialize_me(request)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
+@api_view()
 def serialize_me(request):
     user = request.user
     if not user.is_authenticated:
