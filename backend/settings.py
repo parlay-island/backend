@@ -94,7 +94,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://parlay-island-frontend-stage.eba-6if9pbpq.us-east-1.elasticbeanstalk.com',
+    'http://parlay-island-frontend-prod.eba-6if9pbpq.us-east-1.elasticbeanstalk.com',
+    'http://parlay-island-game-stage.s3-website.us-east-2.amazonaws.com',
+    'http://parlay-island-game-prod.s3-website.us-east-2.amazonaws.com',
+    'http://127.0.0.1',
+    'http://parlay-island-server-prod.eba-kq6isupz.us-east-2.elasticbeanstalk.com',
+    'http://parlay-island-server-dev.eba-kq6isupz.us-east-2.elasticbeanstalk.com',
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    'http://localhost:*',
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
