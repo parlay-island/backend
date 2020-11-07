@@ -7,6 +7,7 @@ from teacher.models import ParlayUser, Player, Teacher
 
 
 class UserTestCase(TestCase):
+    teacher_class = None
     client = None
     teacher_user = None
     player_user = None
@@ -19,11 +20,13 @@ class UserTestCase(TestCase):
         self.client = Client()
         self.teacher_user = ParlayUser.objects.create_user(username=self.teacher_username, password=self.password,
                                                            is_teacher=True)
+        self.teacher_class = Teacher.objects.get(user=self.teacher_user).assigned_class
         self.player_user = ParlayUser.objects.create_user(username=self.player_username, password=self.password,
-                                                          is_teacher=False)
+                                                          is_teacher=False, class_code=self.teacher_class.code)
 
     def test_create_player_when_is_teacher_false(self):
-        ParlayUser.objects.create_user(username=self.username_2, password=self.password, is_teacher=False)
+        ParlayUser.objects.create_user(username=self.username_2, password=self.password,
+                                       is_teacher=False, class_code=self.teacher_class.code)
         assert_that(Player.objects.all(), has_length(2))
 
     def test_create_teacher_when_is_teacher_true(self):
