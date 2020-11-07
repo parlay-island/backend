@@ -31,7 +31,10 @@ def level_controller(request, level_id):
 
 @api_view()
 def level_results_controller(request, level):
-    user = ParlayUser.objects.get(username=request.user.username)
+    try:
+        user = ParlayUser.objects.get(username=request.user.username)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'You are not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
     if not user.is_teacher:
         return JsonResponse({'error': 'You do not have an associated teacher account'},
                             status=status.HTTP_401_UNAUTHORIZED)

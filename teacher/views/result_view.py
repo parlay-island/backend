@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from teacher.models import Result, Level, Question, Response, Player
+from teacher.models import Result, Level, Question, Response, Player, Class
 from teacher.serializer import ResultSerializer
 from teacher.views import get_paginated_results, LEVEL
 
@@ -42,7 +42,8 @@ def post_result(request, player):
         result = Result.objects.create(
             distance=payload[DISTANCE],
             player=player,
-            level=Level.objects.get(id=payload[LEVEL]) 
+            level=Level.objects.get(id=payload[LEVEL]),
+            assigned_class=player.assigned_class
         )
         update_responses(payload[QUESTIONS], player)
         update_player_accuracy(player)
