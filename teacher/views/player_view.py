@@ -26,7 +26,7 @@ def players_controller(request):
         user = ParlayUser.objects.get(username=request.user.username)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'Invalid authentication'}, status=status.HTTP_401_UNAUTHORIZED)
-    if user.is_teacher:
+    if not user.is_teacher:
         return JsonResponse({'error': 'You do not have an associated teacher account'},
                             status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
