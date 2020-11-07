@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from django.test import TestCase, Client
 
 from hamcrest import assert_that, has_length, is_

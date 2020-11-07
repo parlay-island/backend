@@ -1,12 +1,11 @@
 import json
 
 from rest_framework.decorators import api_view
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
 
-from teacher.models import Player, Response, Level, Question
+from teacher.models import Player, Response, Level, Question, Teacher, ParlayUser
 from teacher.serializer import ResponseSerializer, PlayerSerializer
 from teacher.views import post_result
 
@@ -14,15 +13,15 @@ LEVEL = 'level'
 NAME = 'name'
 
 
+@api_view()
 def me_controller(request):
     if request.method == 'GET':
         return serialize_me(request)
-    return JsonResponse({'error' : 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return JsonResponse({'error': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@api_view()
 def players_controller(request):
-    if request.method == 'POST':
-        return post_player(request)
     if request.method == 'GET':
         return get_all_players(request)
     return JsonResponse({'error': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -58,7 +57,11 @@ def get_single_player(request, playerId):
 
 
 def get_all_players(request):
-    players = Player.objects.order_by('name').all()
+    if not ParlayUser.objects.get(username=request.user.username).is_teacher:
+        return JsonResponse({'error': 'You do not have an associated teacher account'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+    teacher = Teacher.objects.get(user__username=request.user.username)
+    players = Player.objects.order_by('name').filter(assigned_class=teacher.assigned_class)
     players_serialized = list(
         map(lambda player: PlayerSerializer.serialize(player), players))
     return JsonResponse({'players': players_serialized}, safe=False, status=status.HTTP_200_OK)
@@ -78,12 +81,6 @@ def get_results_by_level(request, player):
     return JsonResponse({'results': response_list}, status=status.HTTP_200_OK)
 
 
-def post_player(request):
-    payload = json.loads(request.body)
-    player = Player.objects.create(name=payload[NAME])
-    return JsonResponse(PlayerSerializer.serialize(player), status=status.HTTP_201_CREATED)
-
-@api_view()
 def serialize_me(request):
     user = request.user
     try:

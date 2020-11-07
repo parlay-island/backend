@@ -3,7 +3,9 @@ import json
 from django.http import JsonResponse
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
-from teacher.models import Result, Level
+from rest_framework.decorators import api_view
+
+from teacher.models import Result, Level, ParlayUser, Teacher
 from teacher.serializer import ResultSerializer, LevelSerializer
 from teacher.views import get_paginated_results
 
@@ -27,15 +29,21 @@ def level_controller(request, level_id):
     return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+@api_view()
 def level_results_controller(request, level):
+    user = ParlayUser.objects.get(username=request.user.username)
+    if not user.is_teacher:
+        return JsonResponse({'error': 'You do not have an associated teacher account'},
+                            status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
-        return get_results_by_level(request, level)
+        return get_results_by_level(request, level, user)
     return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-def get_results_by_level(request, level):
-    results = Result.objects.filter(level=Level.objects.get(id=level)).order_by('-distance') \
-        if len(Level.objects.filter(id=level)) > 0 else []
+def get_results_by_level(request, level, user):
+    results = Result.objects.filter(level=Level.objects.get(id=level),
+                                    assigned_class=Teacher.objects.get(user=user).assigned_class)\
+        .order_by('-distance') if len(Level.objects.filter(id=level)) > 0 else []
     page_number = request.GET.get('page')
     results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
     if page_number is not None:
