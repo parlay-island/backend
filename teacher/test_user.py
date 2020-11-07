@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 
-from hamcrest import assert_that, has_length, is_
+from hamcrest import assert_that, has_length, is_, raises
 
 from teacher.models import ParlayUser, Player, Teacher
 
@@ -57,3 +57,9 @@ class UserTestCase(TestCase):
 
     def test_teacher_me_unauthenticated(self):
         assert_that(self.client.get('/teachers/me/').status_code, is_(401))
+
+    def test_fail_player_creation_with_invalid_class_code(self):
+        assert_that(lambda: ParlayUser.objects.create_user(username=self.username_2,
+                                                           password=self.password,
+                                                           is_teacher=False,
+                                                           class_code='fake code'), raises(ValueError))

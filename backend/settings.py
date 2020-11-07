@@ -182,10 +182,6 @@ CSRF_COOKIE_HTTPONLY = False
 
 SESSION_COOKIE_SECURE = False
 
-SESSION_COOKIE_SAMESITE = 'None'
-
-SESSION_COOKIE_SAMESITE_FORCE_ALL = True
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
