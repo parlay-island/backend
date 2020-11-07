@@ -3,6 +3,7 @@ import string
 
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
@@ -27,8 +28,12 @@ class ParlayUserManager(BaseUserManager):
         else:
             if not extra_fields.get("class_code"):
                 raise ValueError("The class code was not set on creation of a player")
+            try:
+                assigned_class = Class.objects.get(code=extra_fields.get("class_code"))
+            except ObjectDoesNotExist:
+                raise ValueError("The class code used does not have an associated class")
             player = Player.objects.create(user=user, name=user.username,
-                                           assigned_class=Class.objects.get(code=extra_fields.get("class_code")))
+                                           assigned_class=assigned_class)
         return user
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
