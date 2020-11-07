@@ -3,8 +3,9 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
+from rest_framework.decorators import api_view
 
-from teacher.models import Result, Level, Question, Response, Player
+from teacher.models import Result, Level, Question, Response, Player, Class
 from teacher.serializer import ResultSerializer
 from teacher.views import get_paginated_results, LEVEL
 
@@ -16,6 +17,8 @@ QUESTION_ID = 'question_id'
 CHOICE_ID = 'choice_id'
 ACCURACY = 'accuracy'
 
+
+@api_view()
 def results_controller(request):
     if request.method == 'GET':
         return get_all_results(request)
@@ -39,7 +42,8 @@ def post_result(request, player):
         result = Result.objects.create(
             distance=payload[DISTANCE],
             player=player,
-            level=Level.objects.get(id=payload[LEVEL]) 
+            level=Level.objects.get(id=payload[LEVEL]),
+            assigned_class=player.assigned_class
         )
         update_responses(payload[QUESTIONS], player)
         update_player_accuracy(player)
@@ -49,6 +53,7 @@ def post_result(request, player):
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except KeyError as e:
         return JsonResponse({'error': 'Must define %s' % str(e)}, safe=False, status=status.HTTP_400_BAD_REQUEST)
+
 
 def update_player_accuracy(player):
     responses = Response.objects.filter(player=player.id)
@@ -64,6 +69,7 @@ def update_player_accuracy(player):
         accuracy = (num_questions_correct / total) * 100
     setattr(player, ACCURACY, accuracy)
     player.save()
+
 
 def update_responses(responses_request, player):
     for response_request in responses_request:

@@ -9,7 +9,7 @@ run_django_tests:
     - docker
   script:
     - pip install pipenv
-    - pipenv --rm
+    - pipenv --rm || true
     - pipenv install
     - ./start_db.sh || true
     - cp .env.local .env
