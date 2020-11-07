@@ -35,9 +35,6 @@ def level_results_controller(request, level):
         user = ParlayUser.objects.get(username=request.user.username)
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'You are not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
-    if not user.is_teacher:
-        return JsonResponse({'error': 'You do not have an associated teacher account'},
-                            status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
         return get_results_by_level(request, level, user)
     return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
