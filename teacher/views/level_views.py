@@ -5,7 +5,7 @@ from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import api_view
 
-from teacher.models import Result, Level, ParlayUser, Teacher
+from teacher.models import Result, Level, ParlayUser, Teacher, Player
 from teacher.serializer import ResultSerializer, LevelSerializer
 from teacher.views import get_paginated_results
 
@@ -44,8 +44,10 @@ def level_results_controller(request, level):
 
 
 def get_results_by_level(request, level, user):
+    assigned_class = Teacher.objects.get(user=user).assigned_class if user.is_teacher\
+        else Player.objects.get(user=user).assigned_class
     results = Result.objects.filter(level=Level.objects.get(id=level),
-                                    assigned_class=Teacher.objects.get(user=user).assigned_class)\
+                                    assigned_class=assigned_class)\
         .order_by('-distance') if len(Level.objects.filter(id=level)) > 0 else []
     page_number = request.GET.get('page')
     results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
