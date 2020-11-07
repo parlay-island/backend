@@ -22,8 +22,15 @@ def me_controller(request):
 
 @api_view()
 def players_controller(request):
+    try:
+        user = ParlayUser.objects.get(username=request.user.username)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Invalid authentication'}, status=status.HTTP_401_UNAUTHORIZED)
+    if user.is_teacher:
+        return JsonResponse({'error': 'You do not have an associated teacher account'},
+                            status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
-        return get_all_players(request)
+        return get_all_players(request, user)
     return JsonResponse({'error': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
@@ -56,11 +63,8 @@ def get_single_player(request, playerId):
                             safe=False, status=status.HTTP_404_NOT_FOUND)
 
 
-def get_all_players(request):
-    if not ParlayUser.objects.get(username=request.user.username).is_teacher:
-        return JsonResponse({'error': 'You do not have an associated teacher account'},
-                            status=status.HTTP_401_UNAUTHORIZED)
-    teacher = Teacher.objects.get(user__username=request.user.username)
+def get_all_players(request, user):
+    teacher = Teacher.objects.get(user__username=user.username)
     players = Player.objects.order_by('name').filter(assigned_class=teacher.assigned_class)
     players_serialized = list(
         map(lambda player: PlayerSerializer.serialize(player), players))
