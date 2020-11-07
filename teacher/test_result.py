@@ -1,14 +1,25 @@
+import io
 import json
 import mock
+from django.core.handlers.wsgi import WSGIRequest
+from django.http import QueryDict, HttpRequest
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Result, Level, Player, Question, Response
+from teacher.models import Result, Level, Player, Question, Response, ParlayUser, Class, Teacher
 from teacher.serializer import ResultSerializer
-from teacher.views import DISTANCE, LEVEL
+from teacher.views import DISTANCE, LEVEL, level_views
 from django.test import Client
 
 
 class ResultTestCase(TestCase):
+    mock_request = WSGIRequest({
+            'REQUEST_METHOD': 'GET',
+            'wsgi.input': io.StringIO(),
+        })
+    code = "code234123"
+    username = "username"
+    teacher_username = "teacher-username"
+    password = "J#5eI9qwpp"
     player = None
     client: Client = None
     level1: Level = None
@@ -22,9 +33,20 @@ class ResultTestCase(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.player = Player.objects.create(
-            name="Player"
+        self.teacher_user = ParlayUser.objects.create_user(
+            username=self.teacher_username,
+            password=self.password,
+            is_teacher=True
         )
+        self.assigned_class = Teacher.objects.get(user=self.teacher_user).assigned_class
+        self.code = self.assigned_class.code
+        self.player_user = ParlayUser.objects.create_user(
+            username=self.username,
+            password=self.password,
+            is_teacher=False,
+            class_code=self.code
+        )
+        self.player = Player.objects.get(user=self.player_user)
         self.level1 = Level.objects.create(
             name="Level 1"
         )
@@ -44,35 +66,42 @@ class ResultTestCase(TestCase):
         self.result1_level1 = Result.objects.create(
             level=self.level1,
             distance=100.0,
-            player=self.player
+            player=self.player,
+            assigned_class=self.assigned_class
         )
         self.result2_level1 = Result.objects.create(
             level=self.level1,
             distance=200.0,
-            player=self.player
+            player=self.player,
+            assigned_class=self.assigned_class
         )
         self.result1_level2 = Result.objects.create(
             level=self.level2,
             distance=300.0,
-            player=self.player
+            player=self.player,
+            assigned_class=self.assigned_class
         )
         self.result2_level2 = Result.objects.create(
             level=self.level2,
             distance=150.0,
-            player=self.player
+            player=self.player,
+            assigned_class=self.assigned_class
         )
 
+    def tearDown(self):
+        self.player_user.delete()
+
     def result_post_request(self, choice, distance, player, question_id):
-        self.client.post('/players/%d/results/' % player.id,
-                         data={'distance': distance,
-                               'level': self.level1.id,
-                               'questions': [
+        assert_that(self.client.post('/players/%d/results/' % player.id,
+                    data={'distance': distance,
+                          'level': self.level1.id,
+                          'questions': [
                                    {
                                        'question_id': question_id,
                                        'choice_id': choice
                                    }
                                ]},
-                         content_type='application/json')
+                         content_type='application/json').status_code, is_(201))
 
     def test_get_all_results_non_paginated(self):
         res = json.loads(self.client.get('/results/summary/').content)['results']
@@ -96,27 +125,38 @@ class ResultTestCase(TestCase):
         assert_that(res_paginated, equal_to(res_non_paginated))
 
     def test_get_results_by_level_non_paginated(self):
-        res = json.loads(self.client.get('/levels/%d/results/' % self.level1.id).content)['results']
+        res = json.loads(level_views.get_results_by_level(self.mock_request, self.level1.id,
+                                                          self.teacher_user).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(2))
 
     @mock.patch("teacher.views.level_views.PAGE_SIZE", 1)
     def test_get_results_by_level_paginated(self):
-        res = json.loads(self.client.get('/levels/%d/results/?page=%d' % (self.level1.id, 1)).content)['results']
+        mock_request_with_page = HttpRequest()
+        mock_request_with_page.GET.__setitem__('page', 1)
+        res = json.loads(level_views.get_results_by_level(mock_request_with_page, self.level1.id,
+                                                          self.teacher_user).content)['results']
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res, has_length(1))
 
     @mock.patch("teacher.views.level_views.PAGE_SIZE", 2)
     def test_paginated_results_same_as_non_paginated_for_level(self):
-        res_paginated = json.loads(self.client.get('/levels/%d/results/?page=%d' %
-                                                   (self.level1.id, 1)).content)['results']
-        res_non_paginated = json.loads(self.client.get('/levels/%d/results/' % self.level1.id).content)['results']
+        mock_request_with_page = WSGIRequest({
+            'REQUEST_METHOD': 'GET',
+            'wsgi.input': io.StringIO(),
+            'page': 1
+        })
+        res_paginated = json.loads(level_views.get_results_by_level(mock_request_with_page, self.level1.id,
+                                                                    self.teacher_user).content)['results']
+        res_non_paginated = json.loads(level_views.get_results_by_level(self.mock_request, self.level1.id,
+                                                                        self.teacher_user).content)['results']
         assert_that(res_paginated, equal_to(res_non_paginated))
 
     # negative path test
     def test_get_result_by_level_when_doesnt_include_level(self):
-        assert_that(json.loads(self.client.get('/levels/3/results/').content)['results'],
+        assert_that(json.loads(level_views.get_results_by_level(self.mock_request, 17,
+                                                                self.teacher_user).content)['results'],
                     has_length(0))
 
     # negative path test

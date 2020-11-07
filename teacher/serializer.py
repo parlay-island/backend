@@ -79,5 +79,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
     @staticmethod
-    def serialize(player):
-        return TeacherSerializer(player).data
+    def serialize(teacher):
+        teacher_serialized = TeacherSerializer(teacher).data
+        teacher_serialized['class_code'] = teacher.assigned_class.code
+        return teacher_serialized

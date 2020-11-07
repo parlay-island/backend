@@ -7,6 +7,7 @@ from teacher.models import Question, Choice, Level
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
 from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL
 
+
 def questions_controller(request):
     if request.method == 'GET':
         if TAG in request.GET:
@@ -116,6 +117,7 @@ def put_question(request, questionId):
     except ObjectDoesNotExist:
         return JsonResponse({'error': 'No question found with id [%d]' % questionId},
                             safe=False, status=status.HTTP_404_NOT_FOUND)
+
 
 def update_question_choices(updatedChoiceList):
     for updatedChoice in updatedChoiceList:

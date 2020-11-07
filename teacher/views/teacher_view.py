@@ -8,12 +8,13 @@ from teacher.models import Teacher
 from teacher.serializer import TeacherSerializer
 
 
+@api_view()
 def me_controller(request):
     if request.method == 'GET':
         return serialize_me(request)
     return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-@api_view()
+
 def serialize_me(request):
     user = request.user
     if not user.is_authenticated:
@@ -22,5 +23,5 @@ def serialize_me(request):
         teacher = Teacher.objects.get(user=user)
         return JsonResponse(TeacherSerializer.serialize(teacher), status=status.HTTP_200_OK)
     except ObjectDoesNotExist as e:
-        return JsonResponse({'error': 'You do not have an associated player account'},
+        return JsonResponse({'error': 'You do not have an associated teacher account'},
                             status=status.HTTP_401_UNAUTHORIZED)
