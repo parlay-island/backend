@@ -53,12 +53,13 @@ class ParlayUser(AbstractUser):
     email = models.EmailField(blank=True)
     is_teacher = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
+    class_code = models.CharField(max_length=500, default="")
 
     objects = ParlayUserManager()
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email", "is_teacher"]
+    REQUIRED_FIELDS = ["email", "is_teacher", "class_code"]
 
 
 class Level(models.Model):
