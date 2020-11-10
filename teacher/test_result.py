@@ -5,7 +5,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import QueryDict, HttpRequest
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Result, Level, Player, Question, Response, ParlayUser, Class, Teacher
+from teacher.models import Result, Level, Player, Question, Response, ParlayUser, Class, Teacher, Choice
 from teacher.serializer import ResultSerializer
 from teacher.views import DISTANCE, LEVEL, level_views
 from django.test import Client
@@ -30,6 +30,7 @@ class ResultTestCase(TestCase):
     result1_level2: Result = None
     result2_level2: Result = None
     id = None
+    choice = None
 
     def setUp(self):
         self.client = Client()
@@ -58,6 +59,8 @@ class ResultTestCase(TestCase):
             level=self.level1,
             answer=[0]
         )
+        self.choice = Choice.objects.create(body='Choice 1', question=self.question)
+
         self.question2 = Question.objects.create(
             body='This is a question2',
             level=self.level1,
@@ -199,6 +202,26 @@ class ResultTestCase(TestCase):
         assert_that(responses, has_length(1))
         assert_that(responses[0].choice, is_(choice))
         assert_that(responses[0].count, is_(1))
+
+    def test_times_chosen_updates_on_result_post(self):
+        player = Player.objects.create(name="Player4")
+        initial_times_answered = self.question.times_answered
+        initial_times_correct = self.question.times_correct
+        choice = 0 # correct choice
+        distance = 500.0
+        self.result_post_request(choice, distance, player, self.question.id)
+        question = Question.objects.get(id=self.question.id)
+        # test that times_answered is updated
+        updated_times_answered = question.times_answered
+        assert_that(initial_times_answered, is_(0))
+        assert_that(updated_times_answered, is_(1))
+        # test that times_correct is updated
+        updated_times_correct = question.times_correct
+        assert_that(initial_times_correct, is_(0))
+        assert_that(updated_times_correct, is_(1))
+        # test that choice times_chosen is updated
+        choice = Choice.objects.get(question=self.question.id)
+        assert_that(choice.times_chosen, is_(1))
     
     def test_accuracy_updates_on_result_post(self):
         player = Player.objects.create(name="Player3")
