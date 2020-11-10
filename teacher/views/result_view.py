@@ -78,7 +78,21 @@ def update_responses(responses_request, player):
 
 def add_response(response_request, player):
     question = Question.objects.get(id=response_request[QUESTION_ID])
+    question.times_answered += 1
     choice = response_request[CHOICE_ID]
+    update_choice_times_chosen(question, choice)
     response, created = Response.objects.get_or_create(player=player, question=question, choice=choice)
     response.count += 1
     response.save()
+
+    if response.get_is_correct():
+        question.times_correct += 1
+    question.save()
+
+def update_choice_times_chosen(question, choiceIndex):
+    for index, choice in enumerate(question.get_choices()):
+        if index == choiceIndex:
+            choice.times_chosen += 1
+            choice.save()
+
+
