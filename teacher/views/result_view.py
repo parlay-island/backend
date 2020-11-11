@@ -16,6 +16,7 @@ QUESTIONS = 'questions'
 QUESTION_ID = 'question_id'
 CHOICE_ID = 'choice_id'
 ACCURACY = 'accuracy'
+AWARD_LIST = 'award_list'
 
 
 @api_view()
@@ -43,7 +44,8 @@ def post_result(request, player):
             distance=payload[DISTANCE],
             player=player,
             level=Level.objects.get(id=payload[LEVEL]),
-            assigned_class=player.assigned_class
+            assigned_class=player.assigned_class,
+            award_list=payload[AWARD_LIST] if AWARD_LIST in payload else []
         )
         update_responses(payload[QUESTIONS], player)
         update_player_accuracy(player)
@@ -88,6 +90,7 @@ def add_response(response_request, player):
     if response.get_is_correct():
         question.times_correct += 1
     question.save()
+
 
 def update_choice_times_chosen(question, choiceIndex):
     for index, choice in enumerate(question.get_choices()):

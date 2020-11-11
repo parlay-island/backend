@@ -30,7 +30,7 @@ class ChoiceSerializer(serializers.ModelSerializer):
 class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = ['id', 'level', 'distance', 'player_id']
+        fields = ['id', 'level', 'distance', 'player_id', 'award_list']
 
     @staticmethod
     def serialize(result):
