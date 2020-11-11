@@ -103,7 +103,7 @@ class Question(models.Model):
     level = models.ForeignKey(Level, on_delete=models.CASCADE, null=True)
  
     def get_choices(self):
-        return Choice.objects.filter(question=self.id)
+        return Choice.objects.filter(question=self.id).order_by('id')
 
  
 class Choice(models.Model):
