@@ -88,6 +88,7 @@ class Result(models.Model):
     distance = models.FloatField(default=0.0)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
     assigned_class = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+    award_list = ArrayField(models.CharField(max_length=400), size=8, default=list)
 
     def get_player_name(self):
         return self.player.name

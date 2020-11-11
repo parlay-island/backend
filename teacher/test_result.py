@@ -88,7 +88,8 @@ class ResultTestCase(TestCase):
             level=self.level2,
             distance=150.0,
             player=self.player,
-            assigned_class=self.assigned_class
+            assigned_class=self.assigned_class,
+            award_list=['best_award']
         )
 
     def tearDown(self):
