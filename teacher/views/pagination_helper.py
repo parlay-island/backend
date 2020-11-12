@@ -1,13 +1,5 @@
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
-BODY = 'body'
-TIMES_ANSWERED = 'times_answered'
-TIMES_CORRECT = 'times_correct'
-TIMES_CHOSEN = 'times_chosen'
-TAGS = 'tags'
-ANSWER = 'answer'
-TAG = 'tag'
-
 
 class BadRequestException(Exception):
     pass

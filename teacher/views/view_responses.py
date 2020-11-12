@@ -1,5 +1,12 @@
+"""
+view_responses.py
+
+Contains utility functions and decorator functions for more readable
+and declarative view methods.
+"""
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from rest_framework import status
 
 from teacher.models import ParlayUser
@@ -7,7 +14,7 @@ from teacher.models import ParlayUser
 
 def requires_parlay_user(func):
     def wrapper(*args, **kwargs):
-        request = args[0]
+        request: HttpRequest = args[0]
         try:
             user = ParlayUser.objects.get(username=request.user.username)
         except ObjectDoesNotExist:
