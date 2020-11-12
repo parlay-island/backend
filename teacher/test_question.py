@@ -1,12 +1,13 @@
 import json
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Question, Level, Choice
+from teacher.models import Question, Level, Choice, Class, ParlayUser
 from teacher.serializer import QuestionSerializer
 from django.test import Client
 
 
 class QuestionTestCase(TestCase):
+    code = '123456789'
     tag = 'tag'
     client: Client = None
     question: Question = None
@@ -17,17 +18,27 @@ class QuestionTestCase(TestCase):
 
     def setUp(self):
         self.client: Client = Client()
+        self.assigned_class = Class.objects.create(name='class', code=self.code)
         self.level = Level.objects.create(name='Economics')
         self.question = Question.objects.create(
             body='This is a question',
-            level=self.level
+            level=self.level,
+            assigned_class=self.assigned_class
         )
         self.question_tagged = Question.objects.create(
             body='This is a question',
             tags=[self.tag],
-            level=self.level
+            level=self.level,
+            assigned_class=self.assigned_class
         )
         self.choice = Choice.objects.create(body='Choice 1', question=self.question)
+        self.user = ParlayUser.objects.create_user(
+            username='new player',
+            password='#WordOfPass1',
+            is_teacher=False,
+            class_code=self.code
+        )
+        self.client.force_login(self.user)
 
     def test_get_all_questions(self):
         assert_that(json.loads(self.client.get('/questions/').content)['questions'][0],
