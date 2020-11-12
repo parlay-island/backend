@@ -61,10 +61,15 @@ class ParlayUser(AbstractUser):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "is_teacher", "class_code"]
 
+    def get_assigned_class(self):
+        return Teacher.objects.get(user=self).assigned_class if self.is_teacher \
+            else Player.objects.get(user=self).assigned_class
+
 
 class Level(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=500, default="")
+    assigned_class = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
 
 class Teacher(models.Model):

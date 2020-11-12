@@ -1,6 +1,7 @@
 import json
 
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import api_view
@@ -13,11 +14,16 @@ PAGE_SIZE = 10
 LEVEL = 'level'
 
 
+@api_view(['GET', 'POST'])
 def levels_controller(request):
+    try:
+        user = ParlayUser.objects.get(username=request.user.username)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'You are not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
     if request.method == 'GET':
-        return get_levels(request)
+        return get_levels(request, user)
     if request.method == 'POST':
-        return post_level(request)
+        return post_level(request, user)
     return JsonResponse({'error': 'Method Not Allowed'}, safe=False, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
@@ -41,10 +47,8 @@ def level_results_controller(request, level):
 
 
 def get_results_by_level(request, level, user):
-    assigned_class = Teacher.objects.get(user=user).assigned_class if user.is_teacher\
-        else Player.objects.get(user=user).assigned_class
     results = Result.objects.filter(level=Level.objects.get(id=level),
-                                    assigned_class=assigned_class)\
+                                    assigned_class=user.get_assigned_class())\
         .order_by('-distance') if len(Level.objects.filter(id=level)) > 0 else []
     page_number = request.GET.get('page')
     results_serialized = list(map(lambda result: ResultSerializer.serialize(result), results))
@@ -53,16 +57,17 @@ def get_results_by_level(request, level, user):
     return JsonResponse({'results': results_serialized}, safe=False, status=status.HTTP_200_OK)
 
 
-def get_levels(request):
-    levels = Level.objects.all()
+def get_levels(request, user):
+    levels = Level.objects.filter(assigned_class=user.get_assigned_class())
     levels_serialized = list(map(lambda level: LevelSerializer.serialize(level), levels))
     return JsonResponse({'levels': levels_serialized}, safe=False, status=status.HTTP_200_OK)
 
 
-def post_level(request):
+def post_level(request, user):
     payload = json.loads(request.body)
     try:
-        level = Level.objects.create(name=payload['name'])
+        level = Level.objects.create(name=payload['name'], assigned_class=user.get_assigned_class())
+        print(level)
         return JsonResponse(LevelSerializer.serialize(level), safe=False, status=status.HTTP_200_OK)
     except KeyError as e:
         return JsonResponse({'error': 'Must define %s' % str(e)}, safe=False, status=status.HTTP_400_BAD_REQUEST)
