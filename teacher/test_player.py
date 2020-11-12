@@ -1,14 +1,11 @@
 import json
 from unittest import TestCase
 
-from django.contrib.auth import authenticate
-from django.core.handlers.wsgi import WSGIRequest
 from django.test import Client
-import io
 from hamcrest import *
 
-from teacher.models import Player, Question, Level, Response, ParlayUser, Teacher
-from teacher.views import ACCURACY, NAME, player_view
+from teacher.models import Player, ParlayUser, Teacher
+from teacher.views import ACCURACY, NAME
 from teacher.serializer import PlayerSerializer
 
 
@@ -20,8 +17,6 @@ class PlayerTestCase(TestCase):
     player: Player = None
     player2: Player = None
     client: Client = None
-    question: Question = None
-    response: Response = None
     answer = 1
 
     def setUp(self):
@@ -31,16 +26,9 @@ class PlayerTestCase(TestCase):
             password=self.password,
             is_teacher=True
         )
-        self.teacher_user.set_password(self.password)
-        self.teacher_user.save()
+        self.client.force_login(self.teacher_user)
         self.teacher = Teacher.objects.get(user=self.teacher_user)
         class_code = self.teacher.assigned_class.code
-        self.level = Level.objects.create(name='Economics')
-        self.question = Question.objects.create(
-            body='This is a question',
-            level=self.level,
-            answer=[self.answer]
-        )
         self.player = ParlayUser.objects.create_user(
             username='Player',
             password=self.password,
@@ -61,10 +49,7 @@ class PlayerTestCase(TestCase):
         self.player2.delete()
 
     def test_get_all_players(self):
-        player_fetched = json.loads(player_view.get_all_players(WSGIRequest({
-            'REQUEST_METHOD': 'GET',
-            'wsgi.input': io.StringIO(),
-        }), self.teacher_user).content)['players']
+        player_fetched = json.loads(self.client.get('/players/').content)['players']
         assert_that(player_fetched,
                     has_item(PlayerSerializer.serialize(Player.objects.get(user=self.player))))
         assert_that(player_fetched,
