@@ -81,7 +81,6 @@ def post_level(request, user):
     payload = json.loads(request.body)
     try:
         level = Level.objects.create(name=payload['name'], assigned_class=user.get_assigned_class())
-        print(level)
         return created(LevelSerializer.serialize(level))
     except KeyError as e:
         return must_define(e)
