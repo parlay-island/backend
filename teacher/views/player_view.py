@@ -7,7 +7,7 @@ from rest_framework import status
 
 from teacher.models import Player, Response, Level, Question, Teacher, ParlayUser
 from teacher.serializer import ResponseSerializer, PlayerSerializer
-from teacher.views import post_result
+from teacher.views import post_result, requires_parlay_user
 
 LEVEL = 'level'
 NAME = 'name'

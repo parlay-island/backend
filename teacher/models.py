@@ -61,10 +61,15 @@ class ParlayUser(AbstractUser):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email", "is_teacher", "class_code"]
 
+    def get_assigned_class(self):
+        return Teacher.objects.get(user=self).assigned_class if self.is_teacher \
+            else Player.objects.get(user=self).assigned_class
+
 
 class Level(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=500, default="")
+    assigned_class = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
 
 
 class Teacher(models.Model):
@@ -102,7 +107,8 @@ class Question(models.Model):
     tags = ArrayField(models.CharField(max_length=500), size=8, default=list)
     answer = ArrayField(models.IntegerField(), size=8, default=list)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, null=True)
- 
+    assigned_class = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+
     def get_choices(self):
         return Choice.objects.filter(question=self.id).order_by('id')
 
