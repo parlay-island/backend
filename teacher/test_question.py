@@ -5,6 +5,8 @@ from teacher.models import Question, Level, Choice, Class, ParlayUser
 from teacher.serializer import QuestionSerializer
 from django.test import Client
 
+QUESTIONS = 'questions'
+
 
 class QuestionTestCase(TestCase):
     code = '123456789'
@@ -41,7 +43,7 @@ class QuestionTestCase(TestCase):
         self.client.force_login(self.user)
 
     def test_get_all_questions(self):
-        assert_that(json.loads(self.client.get('/questions/').content)['questions'][0],
+        assert_that(json.loads(self.client.get('/questions/').content)[QUESTIONS][0],
                     has_entries(QuestionSerializer.serialize(self.question)))
 
     def test_post_question(self):
@@ -67,21 +69,21 @@ class QuestionTestCase(TestCase):
         assert_that(Question.objects.get(pk=self.question.id).body, is_(body))
 
     def test_put_questions_with_choices(self):
-        updatedChoice = 'correct answer'
-        timesChosen = 1
+        updated_choice = 'correct answer'
+        times_chosen = 1
         self.client.put('/questions/%d' % self.question.id,
                         data={'body': 'body', 'answer': [0], 'level': self.level.id,
                               'choices': [
                                   {
                                       'id': self.choice.id,
-                                      'body': updatedChoice,
-                                      'times_chosen': timesChosen
+                                      'body': updated_choice,
+                                      'times_chosen': times_chosen
                                   },
                               ]}, content_type='application/json')
         question = Question.objects.get(pk=self.question.id)
         for choice in question.get_choices():
-            assert_that(choice.body, is_(updatedChoice))
-            assert_that(choice.times_chosen, is_(timesChosen))
+            assert_that(choice.body, is_(updated_choice))
+            assert_that(choice.times_chosen, is_(times_chosen))
 
     def test_delete_question(self):
         self.client.delete('/questions/%d' % self.question.id)
@@ -104,13 +106,13 @@ class QuestionTestCase(TestCase):
                     is_(404))
 
     def test_get_questions_by_tag(self):
-        assert_that(json.loads(self.client.get('/questions/?tag=%s' % self.tag).content)['questions'][0],
+        assert_that(json.loads(self.client.get('/questions/?tag=%s' % self.tag).content)[QUESTIONS][0],
                     has_entries(QuestionSerializer.serialize(self.question_tagged)))
 
     def test_get_questions_by_tag_doesnt_include_untagged(self):
-        assert_that(json.loads(self.client.get('/questions/?tag=%s' % 'bad tag').content)['questions'],
+        assert_that(json.loads(self.client.get('/questions/?tag=%s' % 'bad tag').content)[QUESTIONS],
                     has_length(0))
 
     def test_get_questions_by_level(self):
-        assert_that(json.loads(self.client.get('/questions/?level=%s' % self.level.id).content)['questions'][0],
+        assert_that(json.loads(self.client.get('/questions/?level=%s' % self.level.id).content)[QUESTIONS][0],
                     has_entries(QuestionSerializer.serialize(self.question)))

@@ -14,7 +14,8 @@ class MockUser:
 
 
 class ViewResponsesTestCase(TestCase):
-    def test_not_authenticated(self):
+    @staticmethod
+    def test_not_authenticated():
         request = HttpRequest()
         request.user = MockUser()
         assert_that(requires_parlay_user(mock_function)(request).status_code, is_(401))
