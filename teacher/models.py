@@ -107,7 +107,8 @@ class Question(models.Model):
     tags = ArrayField(models.CharField(max_length=500), size=8, default=list)
     answer = ArrayField(models.IntegerField(), size=8, default=list)
     level = models.ForeignKey(Level, on_delete=models.CASCADE, null=True)
- 
+    assigned_class = models.ForeignKey(Class, on_delete=models.CASCADE, null=True)
+
     def get_choices(self):
         return Choice.objects.filter(question=self.id).order_by('id')
 

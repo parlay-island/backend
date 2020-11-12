@@ -3,28 +3,36 @@ import json
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
-from teacher.models import Question, Choice, Level
+from rest_framework.decorators import api_view
+
+from teacher.models import Question, Choice, Level, ParlayUser
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
 from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL, \
-    method_not_allowed, ok, not_found, must_define
+    method_not_allowed, ok, not_found, must_define, not_authenticated
 
 
 def question_not_found(question_id):
     return not_found('question', question_id)
 
 
+@api_view(['GET', 'POST'])
 def questions_controller(request):
+    try:
+        user = ParlayUser.objects.get(username=request.user.username)
+    except ObjectDoesNotExist:
+        return not_authenticated()
     if request.method == 'GET':
         if TAG in request.GET:
-            return get_questions_by_tag(request, request.GET.get(TAG))
+            return get_questions_by_tag(request, request.GET.get(TAG), user)
         elif LEVEL in request.GET:
-            return get_questions_by_level(request, request.GET.get(LEVEL))
-        return get_all_questions(request)
+            return get_questions_by_level(request, request.GET.get(LEVEL), user)
+        return get_all_questions(request, user)
     elif request.method == 'POST':
         return post_question(request)
     return method_not_allowed()
 
 
+@api_view(['GET', 'PUT', 'DELETE'])
 def question_controller(request, questionId):
     if request.method == 'GET':
         return get_single_question(request, questionId)
@@ -35,20 +43,20 @@ def question_controller(request, questionId):
     return method_not_allowed()
 
 
-def get_all_questions(request):
-    questions = Question.objects.all()
+def get_all_questions(request, user):
+    questions = Question.objects.filter(assigned_class=user.get_assigned_class())
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return ok({'questions': questions_serialized})
 
 
-def get_questions_by_tag(request, tag):
-    questions = Question.objects.filter(tags__contains=[tag])
+def get_questions_by_tag(request, tag, user):
+    questions = Question.objects.filter(tags__contains=[tag], assigned_class=user.get_assigned_class())
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return ok({'questions': questions_serialized})
 
 
-def get_questions_by_level(request, level):
-    questions = Question.objects.filter(level=level)
+def get_questions_by_level(request, level, user):
+    questions = Question.objects.filter(level=level, assigned_class=user.get_assigned_class())
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
     return ok({'questions': questions_serialized})
 
