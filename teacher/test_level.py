@@ -6,8 +6,6 @@ from teacher.models import Level, ParlayUser, Class
 from teacher.serializer import LevelSerializer
 from django.test import Client
 
-from teacher.views import levels_controller
-
 
 class LevelTestCase(TestCase):
     code = '123456789'
