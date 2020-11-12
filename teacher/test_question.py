@@ -33,7 +33,7 @@ class QuestionTestCase(TestCase):
         )
         self.choice = Choice.objects.create(body='Choice 1', question=self.question)
         self.user = ParlayUser.objects.create_user(
-            username='Player',
+            username='new player',
             password='#WordOfPass1',
             is_teacher=False,
             class_code=self.code

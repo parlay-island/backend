@@ -1,5 +1,19 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from rest_framework import status
+
+from teacher.models import ParlayUser
+
+
+def requires_parlay_user(func):
+    def wrapper(*args, **kwargs):
+        request = args[0]
+        try:
+            user = ParlayUser.objects.get(username=request.user.username)
+        except ObjectDoesNotExist:
+            return not_authenticated()
+        return func(*args, **kwargs, user=user)
+    return wrapper
 
 
 def not_found(_type, _id):
@@ -14,6 +28,10 @@ def must_define(parameter):
 
 def ok(data):
     return JsonResponse(data, safe=False, status=status.HTTP_200_OK)
+
+
+def created(data):
+    return JsonResponse(data, safe=False, status=status.HTTP_201_CREATED)
 
 
 def method_not_allowed():
