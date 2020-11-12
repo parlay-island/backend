@@ -3,6 +3,8 @@ models.py
 
 Contains all models for the teacher application.
 
+Authors: Jake Derry, Holly Ansel, Jessica Su
+
 This file documents the database schema of the application.
 """
 import random

@@ -1,6 +1,8 @@
 """
 pagination_helper.py
 
+Authors: Jake Derry
+
 Provides helper methods for pagination in case more endpoints than the results
 endpoint needs to be paginated.
 """

@@ -1,6 +1,8 @@
 """
 health.py
 
+Authors: Jake Derry
+
 Provides a health check endpoint which some cloud deployment services
 require including Elastic Beanstalk.
 """

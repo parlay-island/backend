@@ -1,6 +1,8 @@
 """
 result_view.py
 
+Authors: Jake Derry, Holly Ansel, Jessica Su
+
 Contains views that interact with teacher.models.Result and teacher.models.Response.
 These resources are not well-separated in the current API.
 

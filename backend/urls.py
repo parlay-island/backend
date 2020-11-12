@@ -1,6 +1,8 @@
 """
 urls.py
 
+Authors: Jake Derry, Holly Ansel
+
 Contains the url paths of the entire project. It may be helpful to break
 this into a separate url file for the teacher urls like `teacher.urls`.
 

@@ -1,6 +1,8 @@
 """
 teacher_view.py
 
+Authors: Jake Derry, Holly Ansel
+
 Contains views that interact with teacher.models.Teacher.
 """
 

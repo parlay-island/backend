@@ -1,6 +1,8 @@
 """
 view_responses.py
 
+Authors: Jake Derry
+
 Contains utility functions and decorator functions for more readable
 and declarative view methods.
 """

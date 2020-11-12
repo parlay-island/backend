@@ -1,6 +1,8 @@
 """
 serializer.py
 
+Authors: Jake Derry, Holly Ansel
+
 Contains serializers for all models which turn a map into an object.
 """
 from rest_framework import serializers

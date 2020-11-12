@@ -3,6 +3,8 @@ player_view.py
 
 Contains views that interact with teacher.models.Player.
 
+Authors: Jake Derry, Holly Ansel
+
 WARNING: GET `players/results/` will return Response objects rather than the expected
 Result object.
 """

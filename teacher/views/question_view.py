@@ -1,6 +1,8 @@
 """
 question_view.py
 
+Authors: Jake Derry, Holly Ansel, Jessica Su
+
 Contains views that interact with teacher.models.Question.
 """
 import json
