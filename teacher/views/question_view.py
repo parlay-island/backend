@@ -5,7 +5,12 @@ from django.http import JsonResponse
 from rest_framework import status
 from teacher.models import Question, Choice, Level
 from teacher.serializer import QuestionSerializer, ChoiceSerializer
-from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL
+from teacher.views import TAG, TIMES_CHOSEN, BODY, TIMES_ANSWERED, TIMES_CORRECT, TAGS, ANSWER, LEVEL, \
+    method_not_allowed, ok, not_found, must_define
+
+
+def question_not_found(question_id):
+    return not_found('question', question_id)
 
 
 def questions_controller(request):
@@ -17,7 +22,7 @@ def questions_controller(request):
         return get_all_questions(request)
     elif request.method == 'POST':
         return post_question(request)
-    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return method_not_allowed()
 
 
 def question_controller(request, questionId):
@@ -27,25 +32,25 @@ def question_controller(request, questionId):
         return put_question(request, questionId)
     elif request.method == 'DELETE':
         return delete_question(request, questionId)
-    return JsonResponse({'error', 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    return method_not_allowed()
 
 
 def get_all_questions(request):
     questions = Question.objects.all()
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
-    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+    return ok({'questions': questions_serialized})
 
 
 def get_questions_by_tag(request, tag):
     questions = Question.objects.filter(tags__contains=[tag])
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
-    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+    return ok({'questions': questions_serialized})
 
 
 def get_questions_by_level(request, level):
     questions = Question.objects.filter(level=level)
     questions_serialized = list(map(lambda question: QuestionSerializer.serialize(question), questions))
-    return JsonResponse({'questions': questions_serialized}, safe=False, status=status.HTTP_200_OK)
+    return ok({'questions': questions_serialized})
 
 
 def get_single_question(request, questionId):
@@ -53,8 +58,7 @@ def get_single_question(request, questionId):
         question = Question.objects.get(pk=questionId)
         return JsonResponse(QuestionSerializer.serialize(question), status=status.HTTP_200_OK)
     except ObjectDoesNotExist as e:
-        return JsonResponse({'error': 'No question found with id [%d]' % questionId},
-                            safe=False, status=status.HTTP_404_NOT_FOUND)
+        return question_not_found(questionId)
 
 
 def post_question(request):
@@ -66,7 +70,7 @@ def post_question(request):
     except ObjectDoesNotExist as e:
         return JsonResponse({'error': str(e)}, safe=False, status=status.HTTP_404_NOT_FOUND)
     except KeyError as e:
-        return JsonResponse({'error': 'Must define %s' % str(e)}, safe=False, status=status.HTTP_400_BAD_REQUEST)
+        return must_define(str(e))
 
 
 def add_choices(question_map, question, choices_list):
@@ -115,8 +119,7 @@ def put_question(request, questionId):
         question.save()
         return JsonResponse(QuestionSerializer.serialize(question), safe=False, status=status.HTTP_200_OK)
     except ObjectDoesNotExist:
-        return JsonResponse({'error': 'No question found with id [%d]' % questionId},
-                            safe=False, status=status.HTTP_404_NOT_FOUND)
+        return question_not_found(questionId)
 
 
 def update_question_choices(updatedChoiceList):
