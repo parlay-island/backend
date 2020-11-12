@@ -1,3 +1,10 @@
+"""
+models.py
+
+Contains all models for the teacher application.
+
+This file documents the database schema of the application.
+"""
 import random
 import string
 

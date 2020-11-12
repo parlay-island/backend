@@ -1,3 +1,9 @@
+"""
+pagination_helper.py
+
+Provides helper methods for pagination in case more endpoints than the results
+endpoint needs to be paginated.
+"""
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
@@ -14,5 +20,3 @@ def get_paginated_results(results, num_items_per_page, page_number=1):
     except EmptyPage:
         page = paginator.page(paginator.num_pages)
     return page.object_list
-
-

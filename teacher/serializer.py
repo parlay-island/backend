@@ -1,6 +1,11 @@
+"""
+serializer.py
+
+Contains serializers for all models which turn a map into an object.
+"""
 from rest_framework import serializers
 
-from teacher.models import Question, Choice, Result, Level, Response, Player
+from teacher.models import Question, Choice, Result, Level, Response, Player, Teacher
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -75,7 +80,7 @@ class PlayerSerializer(serializers.ModelSerializer):
 
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Player
+        model = Teacher
         fields = ['id', 'name']
 
     @staticmethod
