@@ -1,12 +1,12 @@
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+"""
+pagination_helper.py
 
-BODY = 'body'
-TIMES_ANSWERED = 'times_answered'
-TIMES_CORRECT = 'times_correct'
-TIMES_CHOSEN = 'times_chosen'
-TAGS = 'tags'
-ANSWER = 'answer'
-TAG = 'tag'
+Authors: Jake Derry, Holly Ansel
+
+Provides helper methods for pagination in case more endpoints than the results
+endpoint needs to be paginated.
+"""
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 
 class BadRequestException(Exception):
@@ -22,5 +22,3 @@ def get_paginated_results(results, num_items_per_page, page_number=1):
     except EmptyPage:
         page = paginator.page(paginator.num_pages)
     return page.object_list
-
-

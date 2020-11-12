@@ -2,14 +2,15 @@ import io
 import json
 import mock
 from django.core.handlers.wsgi import WSGIRequest
-from django.http import QueryDict, HttpRequest
 from django.test import TestCase
 from hamcrest import *
-from teacher.models import Result, Level, Player, Question, Response, ParlayUser, Class, Teacher, Choice
+from teacher.models import Result, Level, Player, Question, Response, ParlayUser, Teacher, Choice
 from teacher.serializer import ResultSerializer
-from teacher.views import DISTANCE, LEVEL, level_views
+from teacher.views import DISTANCE, LEVEL
 from django.test import Client
 
+RESULTS = 'results'
+APPLICATION_JSON = 'application/json'
 
 class ResultTestCase(TestCase):
     mock_request = WSGIRequest({
@@ -39,6 +40,7 @@ class ResultTestCase(TestCase):
             password=self.password,
             is_teacher=True
         )
+        self.client.force_login(self.teacher_user)
         self.assigned_class = Teacher.objects.get(user=self.teacher_user).assigned_class
         self.code = self.assigned_class.code
         self.player_user = ParlayUser.objects.create_user(
@@ -105,10 +107,10 @@ class ResultTestCase(TestCase):
                                        'choice_id': choice
                                    }
                                ]},
-                         content_type='application/json').status_code, is_(201))
+                         content_type=APPLICATION_JSON).status_code, is_(201))
 
     def test_get_all_results_non_paginated(self):
-        res = json.loads(self.client.get('/results/summary/').content)['results']
+        res = json.loads(self.client.get('/results/summary/').content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res[2], has_entries(ResultSerializer.serialize(self.result2_level2)))
@@ -117,50 +119,39 @@ class ResultTestCase(TestCase):
 
     @mock.patch("teacher.views.result_view.PAGE_SIZE", 2)
     def test_get_all_results_paginated(self):
-        res = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)['results']
+        res = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res, has_length(2))
 
     @mock.patch("teacher.views.result_view.PAGE_SIZE", 4)
     def test_paginated_results_same_as_non_paginated_for_all(self):
-        res_paginated = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)['results']
-        res_non_paginated = json.loads(self.client.get('/results/summary/').content)['results']
+        res_paginated = json.loads(self.client.get('/results/summary/?page=%d' % 1).content)[RESULTS]
+        res_non_paginated = json.loads(self.client.get('/results/summary/').content)[RESULTS]
         assert_that(res_paginated, equal_to(res_non_paginated))
 
     def test_get_results_by_level_non_paginated(self):
-        res = json.loads(level_views.get_results_by_level(self.mock_request, self.level1.id,
-                                                          self.teacher_user).content)['results']
+        res = json.loads(self.client.get('/levels/%d/results/' % self.level1.id).content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res[1], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(2))
 
     @mock.patch("teacher.views.level_views.PAGE_SIZE", 1)
     def test_get_results_by_level_paginated(self):
-        mock_request_with_page = HttpRequest()
-        mock_request_with_page.GET.__setitem__('page', 1)
-        res = json.loads(level_views.get_results_by_level(mock_request_with_page, self.level1.id,
-                                                          self.teacher_user).content)['results']
+        res = json.loads(self.client.get('/levels/%d/results/?page=%d' % (self.level1.id, 1)).content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result2_level1)))
         assert_that(res, has_length(1))
 
     @mock.patch("teacher.views.level_views.PAGE_SIZE", 2)
     def test_paginated_results_same_as_non_paginated_for_level(self):
-        mock_request_with_page = WSGIRequest({
-            'REQUEST_METHOD': 'GET',
-            'wsgi.input': io.StringIO(),
-            'page': 1
-        })
-        res_paginated = json.loads(level_views.get_results_by_level(mock_request_with_page, self.level1.id,
-                                                                    self.teacher_user).content)['results']
-        res_non_paginated = json.loads(level_views.get_results_by_level(self.mock_request, self.level1.id,
-                                                                        self.teacher_user).content)['results']
+        res_paginated = json.loads(self.client.get('/levels/%d/results/?page=%d' %
+                                                   (self.level1.id, 1)).content)[RESULTS]
+        res_non_paginated = json.loads(self.client.get('/levels/%d/results/' % self.level1.id).content)[RESULTS]
         assert_that(res_paginated, equal_to(res_non_paginated))
 
     # negative path test
     def test_get_result_by_level_when_doesnt_include_level(self):
-        assert_that(json.loads(level_views.get_results_by_level(self.mock_request, 17,
-                                                                self.teacher_user).content)['results'],
+        assert_that(json.loads(self.client.get('/levels/3/results/').content)[RESULTS],
                     has_length(0))
 
     # negative path test
@@ -170,7 +161,7 @@ class ResultTestCase(TestCase):
     # negative path test
     @mock.patch("teacher.views.result_view.PAGE_SIZE", 1)
     def test_paginated_page_not_number(self):
-        res = json.loads(self.client.get('/results/summary/?page=%s' % 'test').content)['results']
+        res = json.loads(self.client.get('/results/summary/?page=%s' % 'test').content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level2)))
         assert_that(res, has_length(1))
 
@@ -178,7 +169,7 @@ class ResultTestCase(TestCase):
 
     @mock.patch("teacher.views.result_view.PAGE_SIZE", 1)
     def test_paginated_page_not_present(self):
-        res = json.loads(self.client.get('/results/summary/?page=%d' % 20).content)['results']
+        res = json.loads(self.client.get('/results/summary/?page=%d' % 20).content)[RESULTS]
         assert_that(res[0], has_entries(ResultSerializer.serialize(self.result1_level1)))
         assert_that(res, has_length(1))
     
@@ -187,7 +178,7 @@ class ResultTestCase(TestCase):
         distance = 500.0
         self.client.post('/players/%d/results/' % player.id,
                          data={'distance': distance, 'level': self.level1.id},
-                         content_type='application/json')
+                         content_type=APPLICATION_JSON)
         result_posted = Result.objects.get(player=player.id)
         result_serialized = ResultSerializer.serialize(result_posted)
         assert_that(result_posted, instance_of(Result))
@@ -243,23 +234,23 @@ class ResultTestCase(TestCase):
     def test_404_for_post_result(self):
         assert_that(self.client.post('/players/%d/results/' % self.player.id,
                                      data={'distance': 300, 'level': 7},
-                                     content_type='application/json').status_code, is_(404))
+                                     content_type=APPLICATION_JSON).status_code, is_(404))
 
     def test_404_for_post_result_when_player_not_present(self):
         assert_that(self.client.post('/players/%d/results/' % 315,
                                      data={'distance': 300, 'level': self.level1.id},
-                                     content_type='application/json').status_code, is_(404))
+                                     content_type=APPLICATION_JSON).status_code, is_(404))
 
     def test_get_results_by_level(self):
         Response.objects.create(question=self.question, choice=0, player=self.player)
         res = json.loads(self.client.get('/players/%d/results/?level=%d' % (self.player.id, self.level1.id))
-                         .content)['results']
+                         .content)[RESULTS]
         assert_that(res[0]['question'], is_(self.question.id))
 
     def test_get_results_by_level_with_wrong_level(self):
         Response.objects.create(question=self.question, choice=0, player=self.player)
         res = json.loads(self.client.get('/players/%d/results/?level=%d' % (self.player.id, 3))
-                         .content)['results']
+                         .content)[RESULTS]
         assert_that(res, has_length(0))
 
     def test_404_for_player_not_present_on_get_results_by_level(self):
